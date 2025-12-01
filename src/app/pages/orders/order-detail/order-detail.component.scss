@@ -550,3 +550,19 @@ $gap: 12px;
 ::ng-deep nb-badge {
   position: static !important;
 }
+
+// Invoice box özel stilleri
+.invoice-box {
+  background: linear-gradient(135deg, rgba(51, 102, 255, 0.03) 0%, rgba(0, 214, 143, 0.03) 100%) !important;
+  border-color: rgba(51, 102, 255, 0.15) !important;
+  
+  .box-title {
+    color: $primary;
+  }
+  
+  .info-row {
+    nb-badge {
+      font-size: 11px;
+    }
+  }
+}

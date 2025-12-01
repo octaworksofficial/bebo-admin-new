@@ -167,6 +167,46 @@
             </div>
           </div>
 
+          <!-- Invoice Info -->
+          <div class="info-box invoice-box">
+            <div class="box-title">Fatura Bilgileri</div>
+            <div class="info-row">
+              <span>Fatura Tipi:</span>
+              <nb-badge [status]="order.isCorporateInvoice ? 'warning' : 'info'" [text]="order.isCorporateInvoice ? 'Kurumsal' : 'Bireysel'"></nb-badge>
+            </div>
+            <!-- Kurumsal fatura ise ek bilgiler -->
+            <ng-container *ngIf="order.isCorporateInvoice">
+              <div class="info-row" *ngIf="order.companyName">
+                <span>Şirket:</span>
+                <span class="copyable">
+                  {{ order.companyName }}
+                  <nb-icon icon="copy-outline" class="copy-icon" (click)="copyToClipboard(order.companyName)" title="Kopyala"></nb-icon>
+                </span>
+              </div>
+              <div class="info-row" *ngIf="order.taxNumber">
+                <span>Vergi No:</span>
+                <span class="copyable">
+                  {{ order.taxNumber }}
+                  <nb-icon icon="copy-outline" class="copy-icon" (click)="copyToClipboard(order.taxNumber)" title="Kopyala"></nb-icon>
+                </span>
+              </div>
+              <div class="info-row" *ngIf="order.taxOffice">
+                <span>Vergi Dairesi:</span>
+                <span class="copyable">
+                  {{ order.taxOffice }}
+                  <nb-icon icon="copy-outline" class="copy-icon" (click)="copyToClipboard(order.taxOffice)" title="Kopyala"></nb-icon>
+                </span>
+              </div>
+              <div class="info-row" *ngIf="order.companyAddress">
+                <span>Fatura Adresi:</span>
+                <span class="address copyable">
+                  {{ order.companyAddress }}
+                  <nb-icon icon="copy-outline" class="copy-icon" (click)="copyToClipboard(order.companyAddress)" title="Kopyala"></nb-icon>
+                </span>
+              </div>
+            </ng-container>
+          </div>
+
           <!-- Customer Info -->
           <div class="info-box">
             <div class="box-title">Müşteri</div>
