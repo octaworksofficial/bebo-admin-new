@@ -1,10 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const path = require('path');
+const compression = require('compression');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // PostgreSQL connection pool
 const connectionString = 'postgresql://postgres:ptrzmLFbwlrQYpPJfeAofGqMkXFdSIhu@crossover.proxy.rlwy.net:37534/railway';
@@ -2083,16 +2086,7 @@ app.get('/api/dashboard/top-products', async (req, res) => {
   }
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Endpoint not found' });
-});
-
-
 // ==================== STATIC FILE SERVING ====================
-const path = require('path');
-const compression = require('compression');
-const fs = require('fs');
 
 // Gzip compression for static files
 app.use(compression());
@@ -2134,7 +2128,6 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
   console.log(`📊 API: http://localhost:${PORT}/api`);
