@@ -23,8 +23,11 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Create minimal package.json for production dependencies
+RUN echo '{"name":"bebo-admin","version":"1.0.0"}' > package.json
+
 # Install production dependencies
-RUN npm install express compression
+RUN npm install express compression --save
 
 # Copy built app from build stage
 COPY --from=build /app/dist ./dist
