@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NbThemeService } from '@nebular/theme';
 import { takeWhile } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 interface DashboardStats {
   totalOrders: number;
@@ -64,7 +65,7 @@ interface TopProduct {
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private alive = true;
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = environment.apiUrl;
 
   stats: DashboardStats | null = null;
   recentOrders: RecentOrder[] = [];
