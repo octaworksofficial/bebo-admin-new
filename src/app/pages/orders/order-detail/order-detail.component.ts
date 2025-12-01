@@ -1,0 +1,211 @@
+import { Component, Input, OnInit } from '@angular/core';
+import { NbDialogRef } from '@nebular/theme';
+import { OrdersService } from '../../../@core/services/orders.service';
+
+@Component({
+  selector: 'ngx-order-detail',
+  templateUrl: './order-detail.component.html',
+  styleUrls: ['./order-detail.component.scss']
+})
+export class OrderDetailComponent implements OnInit {
+  @Input() orderId: number;
+  
+  order: any = null;
+  loading = true;
+  saving = false;
+  error: string = null;
+  hasChanges = false; // Güncelleme yapıldı mı?
+
+  // Form models
+  trackingNumber: string = '';
+  shippingStatus: string = '';
+  notes: string = '';
+
+  shippingStatuses = [
+    { value: 'pending', label: 'Beklemede' },
+    { value: 'preparing', label: 'Hazırlanıyor' },
+    { value: 'shipped', label: 'Kargoya Verildi' },
+    { value: 'delivered', label: 'Teslim Edildi' },
+    { value: 'cancelled', label: 'İptal Edildi' }
+  ];
+
+  constructor(
+    protected ref: NbDialogRef<OrderDetailComponent>,
+    private ordersService: OrdersService
+  ) {}
+
+  ngOnInit() {
+    this.loadOrderDetail();
+  }
+
+  loadOrderDetail() {
+    this.loading = true;
+    this.error = null;
+    
+    this.ordersService.getOrder(this.orderId).subscribe({
+      next: (data) => {
+        this.order = data;
+        this.trackingNumber = data.trackingNumber || '';
+        this.shippingStatus = data.shippingStatus || 'pending';
+        this.notes = data.notes || '';
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Order detail error:', err);
+        this.error = 'Sipariş detayları yüklenirken hata oluştu.';
+        this.loading = false;
+      }
+    });
+  }
+
+  updateShipping() {
+    if (!this.trackingNumber && !this.shippingStatus) {
+      return;
+    }
+
+    this.saving = true;
+    this.ordersService.updateOrderShippingStatus(
+      this.orderId,
+      this.shippingStatus,
+      this.trackingNumber
+    ).subscribe({
+      next: () => {
+        this.saving = false;
+        this.hasChanges = true; // Değişiklik oldu
+        this.loadOrderDetail();
+      },
+      error: (err) => {
+        console.error('Shipping update error:', err);
+        this.error = 'Kargo bilgileri güncellenirken hata oluştu.';
+        this.saving = false;
+      }
+    });
+  }
+
+  updateNotes() {
+    if (!this.notes) {
+      return;
+    }
+
+    this.saving = true;
+    this.ordersService.updateOrderNotes(this.orderId, this.notes).subscribe({
+      next: () => {
+        this.saving = false;
+        this.hasChanges = true; // Değişiklik oldu
+        this.loadOrderDetail();
+      },
+      error: (err) => {
+        console.error('Notes update error:', err);
+        this.error = 'Notlar güncellenirken hata oluştu.';
+        this.saving = false;
+      }
+    });
+  }
+
+  getStatusBadge(status: string): string {
+    const badges = {
+      'pending': 'warning',
+      'success': 'success',
+      'failed': 'danger',
+      'refunded': 'info',
+      'preparing': 'info',
+      'shipped': 'primary',
+      'delivered': 'success',
+      'cancelled': 'danger'
+    };
+    return badges[status] || 'basic';
+  }
+
+  getStatusText(status: string): string {
+    const texts = {
+      // Payment statuses
+      'pending': 'Bekliyor',
+      'success': 'Başarılı',
+      'failed': 'Başarısız',
+      'refunded': 'İade Edildi',
+      // Shipping statuses
+      'preparing': 'Hazırlanıyor',
+      'shipped': 'Kargoda',
+      'delivered': 'Teslim Edildi',
+      'cancelled': 'İptal Edildi'
+    };
+    return texts[status] || status;
+  }
+
+  getOrderTotal(order: any): number {
+    // Öncelik sırası: totalAmount -> paymentAmount -> (sizePrice + framePrice)
+    if (order.totalAmount != null) {
+      return order.totalAmount;
+    }
+    if (order.paymentAmount != null) {
+      return order.paymentAmount;
+    }
+    // Fiziksel ürün ise fiyatları topla
+    if (order.orderType === 'product') {
+      return (order.sizePrice || 0) + (order.framePrice || 0);
+    }
+    return 0;
+  }
+
+  calculateCreditsFromAmount(amount: number): number {
+    // Kredi fiyatlandırması - örneğin: 10 TL = 1 kredi
+    // Bu değeri gerçek fiyatlandırmanıza göre ayarlayın
+    return Math.floor(amount / 10);
+  }
+
+  onImageError(event: any): void {
+    // Görsel yüklenmezse placeholder göster
+    event.target.src = 'assets/images/placeholder.png';
+  }
+
+  downloadGeneratedImage(): void {
+    if (!this.order?.generatedImageUrl) {
+      return;
+    }
+
+    // Görsel URL'sinden dosyayı indir
+    const imageUrl = this.order.generatedImageUrl;
+    const fileName = `siparis-${this.orderId}-gorsel.png`;
+
+    fetch(imageUrl)
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(error => {
+        console.error('Image download error:', error);
+        // CORS hatası durumunda yeni sekmede aç
+        window.open(imageUrl, '_blank');
+      });
+  }
+
+  copyToClipboard(text: string) {
+    if (!text) return;
+    
+    navigator.clipboard.writeText(text).then(() => {
+      // Başarılı kopyalama feedback'i
+      console.log('Kopyalandı:', text);
+    }).catch(err => {
+      console.error('Kopyalama hatası:', err);
+      // Fallback
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    });
+  }
+
+  close() {
+    // Sadece değişiklik olduysa true döndür
+    this.ref.close(this.hasChanges);
+  }
+}

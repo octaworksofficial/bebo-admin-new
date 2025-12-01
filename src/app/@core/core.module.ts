@@ -55,19 +55,14 @@ import { MockDataModule } from './mock/mock-data.module';
 
 const socialLinks = [
   {
-    url: 'https://github.com/akveo/nebular',
+    url: 'https://birebiro.com',
     target: '_blank',
-    icon: 'github',
+    icon: 'globe-outline',
   },
   {
-    url: 'https://www.facebook.com/akveo/',
+    url: 'https://instagram.com/birebiro',
     target: '_blank',
-    icon: 'facebook',
-  },
-  {
-    url: 'https://twitter.com/akveo_inc',
-    target: '_blank',
-    icon: 'twitter',
+    icon: 'camera-outline',
   },
 ];
 

@@ -5,4 +5,6 @@
  */
 export const environment = {
   production: true,
+  apiUrl: 'https://your-production-api.com/api', // Update with production API URL
+  databaseUrl: 'postgresql://postgres:ptrzmLFbwlrQYpPJfeAofGqMkXFdSIhu@crossover.proxy.rlwy.net:37534/railway',
 };

@@ -3,7 +3,8 @@ import { NbMediaBreakpointsService, NbMenuService, NbSidebarService, NbThemeServ
 
 import { UserData } from '../../../@core/data/users';
 import { LayoutService } from '../../../@core/utils';
-import { map, takeUntil } from 'rxjs/operators';
+import { AuthService } from '../../../@core/services/auth.service';
+import { map, takeUntil, filter } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -16,44 +17,46 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private destroy$: Subject<void> = new Subject<void>();
   userPictureOnly: boolean = false;
   user: any;
+  currentUser: any;
 
   themes = [
     {
       value: 'default',
-      name: 'Light',
+      name: 'Açık',
     },
     {
       value: 'dark',
-      name: 'Dark',
+      name: 'Koyu',
     },
     {
       value: 'cosmic',
-      name: 'Cosmic',
+      name: 'Kozmik',
     },
     {
       value: 'corporate',
-      name: 'Corporate',
+      name: 'Kurumsal',
     },
   ];
 
   currentTheme = 'default';
 
-  userMenu = [ { title: 'Profile' }, { title: 'Log out' } ];
+  userMenu = [ { title: 'Çıkış Yap' } ];
 
   constructor(private sidebarService: NbSidebarService,
               private menuService: NbMenuService,
               private themeService: NbThemeService,
               private userService: UserData,
               private layoutService: LayoutService,
-              private breakpointService: NbMediaBreakpointsService) {
+              private breakpointService: NbMediaBreakpointsService,
+              private authService: AuthService) {
   }
 
   ngOnInit() {
     this.currentTheme = this.themeService.currentTheme;
-
-    this.userService.getUsers()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((users: any) => this.user = users.nick);
+    
+    // Current admin user
+    this.currentUser = this.authService.getCurrentUser();
+    this.user = this.currentUser?.displayName || 'Admin';
 
     const { xl } = this.breakpointService.getBreakpointsMap();
     this.themeService.onMediaQueryChange()
@@ -69,6 +72,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
       )
       .subscribe(themeName => this.currentTheme = themeName);
+    
+    // User menu click handler
+    this.menuService.onItemClick()
+      .pipe(
+        filter(({ tag }) => tag === 'user-menu'),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(({ item }) => {
+        if (item.title === 'Çıkış Yap') {
+          this.authService.logout();
+        }
+      });
   }
 
   ngOnDestroy() {

@@ -1,0 +1,580 @@
+<div class="settings-page">
+  <div class="page-header">
+    <h4>Site Ayarları</h4>
+    <div class="header-actions">
+      <span class="saved-message" *ngIf="saved">
+        <nb-icon icon="checkmark-circle-2-outline"></nb-icon>
+        Kaydedildi!
+      </span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="skeleton-tabs">
+      <div class="skeleton-tab" *ngFor="let i of [1,2]"></div>
+    </div>
+    <div class="skeleton-content">
+      <div class="skeleton-field" *ngFor="let i of [1,2,3,4]"></div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error && !loading" class="error-state">
+    <nb-icon icon="alert-triangle-outline"></nb-icon>
+    <span>{{ error }}</span>
+    <button nbButton ghost size="small" (click)="loadData()">Tekrar Dene</button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && !error" class="settings-content">
+    
+    <!-- Ana Sekmeler -->
+    <div class="main-tabs">
+      <button 
+        class="main-tab" 
+        [class.active]="activeMainTab === 'about'"
+        (click)="setMainTab('about')"
+      >
+        <nb-icon icon="info-outline"></nb-icon>
+        Hakkında Sayfası
+      </button>
+      <button 
+        class="main-tab" 
+        [class.active]="activeMainTab === 'contact'"
+        (click)="setMainTab('contact')"
+      >
+        <nb-icon icon="phone-outline"></nb-icon>
+        İletişim & Sosyal Medya
+      </button>
+      <button 
+        class="main-tab" 
+        [class.active]="activeMainTab === 'legal'"
+        (click)="setMainTab('legal')"
+      >
+        <nb-icon icon="file-text-outline"></nb-icon>
+        Yasal Metinler
+      </button>
+    </div>
+
+    <!-- ==================== ABOUT TAB ==================== -->
+    <div class="tab-content" *ngIf="activeMainTab === 'about'">
+      
+      <!-- Dil Seçimi -->
+      <div class="language-selector">
+        <span class="label">Dil:</span>
+        <div class="language-buttons">
+          <button 
+            *ngFor="let lang of languages"
+            class="lang-btn" 
+            [class.active]="activeLanguage === lang.code"
+            (click)="setLanguage(lang.code)"
+          >
+            <span class="flag">{{ lang.flag }}</span>
+            {{ lang.name }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Bölüm Seçimi -->
+      <div class="section-tabs">
+        <button 
+          class="section-tab" 
+          [class.active]="activeSection === 1"
+          (click)="setSection(1)"
+        >
+          <nb-icon icon="layers-outline"></nb-icon>
+          Bölüm 1
+        </button>
+        <button 
+          class="section-tab" 
+          [class.active]="activeSection === 2"
+          (click)="setSection(2)"
+        >
+          <nb-icon icon="layers-outline"></nb-icon>
+          Bölüm 2
+        </button>
+        <button 
+          class="section-tab" 
+          [class.active]="activeSection === 3"
+          (click)="setSection(3)"
+        >
+          <nb-icon icon="layers-outline"></nb-icon>
+          Bölüm 3
+        </button>
+        <button 
+          class="section-tab" 
+          [class.active]="activeSection === 'mission'"
+          (click)="setSection('mission')"
+        >
+          <nb-icon icon="flag-outline"></nb-icon>
+          Misyon & Vizyon
+        </button>
+      </div>
+
+      <!-- Section 1 -->
+      <div class="section-content" *ngIf="activeSection === 1">
+        <div class="section-header">
+          <h5>Bölüm 1 - {{ activeLanguage === 'tr' ? 'Türkçe' : activeLanguage === 'en' ? 'English' : 'Français' }}</h5>
+        </div>
+        
+        <div class="form-group">
+          <label>Görsel URL</label>
+          <input 
+            nbInput 
+            fullWidth 
+            [ngModel]="currentContent?.image1"
+            (ngModelChange)="updateContent('image1', $event)"
+            placeholder="https://example.com/image1.jpg"
+          >
+          <span class="hint">Bu bölümün görseli için URL girin</span>
+        </div>
+        
+        <div class="form-group">
+          <label>Başlık</label>
+          <input 
+            nbInput 
+            fullWidth 
+            [ngModel]="currentContent?.title1"
+            (ngModelChange)="updateContent('title1', $event)"
+            [placeholder]="activeLanguage === 'tr' ? 'Birebiro Nedir?' : activeLanguage === 'en' ? 'What is Birebiro?' : 'Qu\'est-ce que Birebiro?'"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label>İçerik</label>
+          <textarea 
+            nbInput 
+            fullWidth 
+            [ngModel]="currentContent?.body1"
+            (ngModelChange)="updateContent('body1', $event)"
+            placeholder="Bu bölümün açıklama metni..."
+            rows="6"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="section-content" *ngIf="activeSection === 2">
+        <div class="section-header">
+          <h5>Bölüm 2 - {{ activeLanguage === 'tr' ? 'Türkçe' : activeLanguage === 'en' ? 'English' : 'Français' }}</h5>
+        </div>
+        
+        <div class="form-group">
+          <label>Görsel URL</label>
+          <input 
+            nbInput 
+            fullWidth 
+            [ngModel]="currentContent?.image2"
+            (ngModelChange)="updateContent('image2', $event)"
+            placeholder="https://example.com/image2.jpg"
+          >
+          <span class="hint">Bu bölümün görseli için URL girin</span>
+        </div>
+        
+        <div class="form-group">
+          <label>Başlık</label>
+          <input 
+            nbInput 
+            fullWidth 
+            [ngModel]="currentContent?.title2"
+            (ngModelChange)="updateContent('title2', $event)"
+            [placeholder]="activeLanguage === 'tr' ? 'Nasıl Çalışır?' : activeLanguage === 'en' ? 'How Does It Work?' : 'Comment ça marche?'"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label>İçerik</label>
+          <textarea 
+            nbInput 
+            fullWidth 
+            [ngModel]="currentContent?.body2"
+            (ngModelChange)="updateContent('body2', $event)"
+            placeholder="Bu bölümün açıklama metni..."
+            rows="6"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="section-content" *ngIf="activeSection === 3">
+        <div class="section-header">
+          <h5>Bölüm 3 - {{ activeLanguage === 'tr' ? 'Türkçe' : activeLanguage === 'en' ? 'English' : 'Français' }}</h5>
+        </div>
+        
+        <div class="form-group">
+          <label>Görsel URL</label>
+          <input 
+            nbInput 
+            fullWidth 
+            [ngModel]="currentContent?.image3"
+            (ngModelChange)="updateContent('image3', $event)"
+            placeholder="https://example.com/image3.jpg"
+          >
+          <span class="hint">Bu bölümün görseli için URL girin</span>
+        </div>
+        
+        <div class="form-group">
+          <label>Başlık</label>
+          <input 
+            nbInput 
+            fullWidth 
+            [ngModel]="currentContent?.title3"
+            (ngModelChange)="updateContent('title3', $event)"
+            [placeholder]="activeLanguage === 'tr' ? 'Neden Birebiro?' : activeLanguage === 'en' ? 'Why Birebiro?' : 'Pourquoi Birebiro?'"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label>İçerik</label>
+          <textarea 
+            nbInput 
+            fullWidth 
+            [ngModel]="currentContent?.body3"
+            (ngModelChange)="updateContent('body3', $event)"
+            placeholder="Bu bölümün açıklama metni..."
+            rows="6"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Mission & Vision -->
+      <div class="section-content" *ngIf="activeSection === 'mission'">
+        <div class="section-header">
+          <h5>Misyon & Vizyon - {{ activeLanguage === 'tr' ? 'Türkçe' : activeLanguage === 'en' ? 'English' : 'Français' }}</h5>
+        </div>
+        
+        <div class="form-group">
+          <label>
+            <nb-icon icon="flag-outline"></nb-icon>
+            Misyon
+          </label>
+          <textarea 
+            nbInput 
+            fullWidth 
+            [ngModel]="currentContent?.mission"
+            (ngModelChange)="updateContent('mission', $event)"
+            [placeholder]="activeLanguage === 'tr' ? 'Şirket misyonu...' : activeLanguage === 'en' ? 'Company mission...' : 'Mission de l\'entreprise...'"
+            rows="4"
+          ></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>
+            <nb-icon icon="eye-outline"></nb-icon>
+            Vizyon
+          </label>
+          <textarea 
+            nbInput 
+            fullWidth 
+            [ngModel]="currentContent?.vision"
+            (ngModelChange)="updateContent('vision', $event)"
+            [placeholder]="activeLanguage === 'tr' ? 'Şirket vizyonu...' : activeLanguage === 'en' ? 'Company vision...' : 'Vision de l\'entreprise...'"
+            rows="4"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Kaydet Butonu - About -->
+      <div class="action-bar">
+        <button nbButton status="primary" [disabled]="saving" (click)="saveAboutContent()">
+          <nb-icon icon="save-outline" *ngIf="!saving"></nb-icon>
+          <nb-spinner *ngIf="saving" size="tiny" status="control"></nb-spinner>
+          {{ saving ? 'Kaydediliyor...' : 'Hakkında İçeriğini Kaydet' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== CONTACT TAB ==================== -->
+    <div class="tab-content" *ngIf="activeMainTab === 'contact'">
+      
+      <div class="two-column">
+        <!-- Sol: İletişim -->
+        <div class="column">
+          <h5 class="column-title">
+            <nb-icon icon="phone-outline"></nb-icon>
+            İletişim Bilgileri
+          </h5>
+          
+          <div class="form-group">
+            <label>E-posta</label>
+            <input 
+              nbInput 
+              fullWidth 
+              type="email"
+              [(ngModel)]="siteSettings.contact_email"
+              placeholder="info@birebiro.com"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Telefon</label>
+            <input 
+              nbInput 
+              fullWidth 
+              [(ngModel)]="siteSettings.contact_phone"
+              placeholder="+90 XXX XXX XX XX"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>Adres</label>
+            <textarea 
+              nbInput 
+              fullWidth 
+              [(ngModel)]="siteSettings.contact_address"
+              placeholder="Şirket adresi..."
+              rows="3"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Sağ: Sosyal Medya -->
+        <div class="column">
+          <h5 class="column-title">
+            <nb-icon icon="share-outline"></nb-icon>
+            Sosyal Medya
+          </h5>
+          
+          <div class="form-group">
+            <label>
+              <nb-icon icon="camera-outline"></nb-icon>
+              Instagram
+            </label>
+            <input 
+              nbInput 
+              fullWidth 
+              [(ngModel)]="siteSettings.social_instagram"
+              placeholder="https://instagram.com/birebiro"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>
+              <nb-icon icon="twitter-outline"></nb-icon>
+              Twitter / X
+            </label>
+            <input 
+              nbInput 
+              fullWidth 
+              [(ngModel)]="siteSettings.social_twitter"
+              placeholder="https://twitter.com/birebiro"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label>
+              <nb-icon icon="facebook-outline"></nb-icon>
+              Facebook
+            </label>
+            <input 
+              nbInput 
+              fullWidth 
+              [(ngModel)]="siteSettings.social_facebook"
+              placeholder="https://facebook.com/birebiro"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Kaydet Butonu - Contact -->
+      <div class="action-bar">
+        <button nbButton status="primary" [disabled]="saving" (click)="saveSiteSettings()">
+          <nb-icon icon="save-outline" *ngIf="!saving"></nb-icon>
+          <nb-spinner *ngIf="saving" size="tiny" status="control"></nb-spinner>
+          {{ saving ? 'Kaydediliyor...' : 'İletişim Bilgilerini Kaydet' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== LEGAL DOCUMENTS TAB ==================== -->
+    <div class="tab-content legal-tab" *ngIf="activeMainTab === 'legal'">
+      
+      <!-- Dil Seçimi -->
+      <div class="language-selector">
+        <span class="label">Dil:</span>
+        <div class="language-buttons">
+          <button 
+            *ngFor="let lang of languages"
+            class="lang-btn" 
+            [class.active]="activeLanguage === lang.code"
+            (click)="setLanguage(lang.code)"
+          >
+            <span class="flag">{{ lang.flag }}</span>
+            {{ lang.name }}
+          </button>
+        </div>
+        <button 
+          nbButton 
+          size="small" 
+          status="success" 
+          class="add-doc-btn"
+          (click)="createNewDocument()"
+        >
+          <nb-icon icon="plus-outline"></nb-icon>
+          Yeni Döküman
+        </button>
+      </div>
+
+      <div class="legal-content">
+        <!-- Sol: Döküman Listesi -->
+        <div class="documents-list">
+          <div class="list-header">
+            <h6>Dökümanlar ({{ legalDocuments.length }})</h6>
+          </div>
+          
+          <div class="documents-container" *ngIf="legalDocuments.length > 0">
+            <div 
+              *ngFor="let doc of legalDocuments"
+              class="document-item"
+              [class.active]="selectedDocument?.id === doc.id"
+              [class.inactive]="!doc.isActive"
+              (click)="selectDocument(doc)"
+            >
+              <div class="doc-info">
+                <span class="doc-title">{{ doc.title || getDocumentTypeLabel(doc.slug) }}</span>
+                <span class="doc-slug">{{ doc.slug }}</span>
+              </div>
+              <div class="doc-actions">
+                <nb-toggle 
+                  [checked]="doc.isActive" 
+                  (checkedChange)="toggleDocumentStatus(doc)"
+                  (click)="$event.stopPropagation()"
+                ></nb-toggle>
+              </div>
+            </div>
+          </div>
+          
+          <div class="empty-list" *ngIf="legalDocuments.length === 0">
+            <nb-icon icon="file-text-outline"></nb-icon>
+            <p>Bu dilde henüz döküman yok</p>
+            <button nbButton size="small" status="primary" (click)="createNewDocument()">
+              İlk Dökümanı Oluştur
+            </button>
+          </div>
+        </div>
+
+        <!-- Sağ: Döküman Editörü -->
+        <div class="document-editor" *ngIf="editingDocument">
+          <div class="editor-header">
+            <h5>
+              <nb-icon icon="edit-outline"></nb-icon>
+              {{ editingDocument.id ? 'Dökümanı Düzenle' : 'Yeni Döküman' }}
+            </h5>
+            <button nbButton ghost size="small" (click)="cancelEdit()">
+              <nb-icon icon="close-outline"></nb-icon>
+            </button>
+          </div>
+          
+          <div class="editor-content">
+            <!-- Yeni döküman için slug seçimi -->
+            <div class="form-group" *ngIf="!editingDocument.id">
+              <label>Döküman Türü (Slug)</label>
+              <nb-select 
+                fullWidth 
+                [(ngModel)]="editingDocument.slug"
+                placeholder="Döküman türü seçin veya yazın"
+              >
+                <nb-option *ngFor="let type of documentTypes" [value]="type.slug">
+                  {{ type.label }} ({{ type.slug }})
+                </nb-option>
+              </nb-select>
+              <span class="hint">Veya özel bir slug girin:</span>
+              <input 
+                nbInput 
+                fullWidth 
+                [(ngModel)]="editingDocument.slug"
+                placeholder="ornek-dokuoman"
+              >
+            </div>
+            
+            <!-- Mevcut döküman için slug gösterimi -->
+            <div class="form-group" *ngIf="editingDocument.id">
+              <label>Slug</label>
+              <input 
+                nbInput 
+                fullWidth 
+                [value]="editingDocument.slug"
+                disabled
+              >
+              <span class="hint">Slug değiştirilemez</span>
+            </div>
+            
+            <div class="form-group">
+              <label>Başlık</label>
+              <input 
+                nbInput 
+                fullWidth 
+                [(ngModel)]="editingDocument.title"
+                [placeholder]="activeLanguage === 'tr' ? 'Gizlilik Politikası' : activeLanguage === 'en' ? 'Privacy Policy' : 'Politique de confidentialité'"
+              >
+            </div>
+            
+            <div class="form-group">
+              <label>İçerik</label>
+              <textarea 
+                nbInput 
+                fullWidth 
+                [(ngModel)]="editingDocument.content"
+                placeholder="Döküman içeriğini buraya yazın..."
+                rows="12"
+              ></textarea>
+              <span class="hint">HTML formatı desteklenir</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Sıra</label>
+                <input 
+                  nbInput 
+                  fullWidth 
+                  type="number"
+                  [(ngModel)]="editingDocument.sortOrder"
+                  placeholder="0"
+                >
+              </div>
+              <div class="form-group half">
+                <label>Durum</label>
+                <nb-toggle [(checked)]="editingDocument.isActive">
+                  {{ editingDocument.isActive ? 'Aktif' : 'Pasif' }}
+                </nb-toggle>
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-actions">
+            <button 
+              nbButton 
+              status="danger" 
+              outline
+              *ngIf="editingDocument.id"
+              (click)="deleteDocument(editingDocument)"
+            >
+              <nb-icon icon="trash-2-outline"></nb-icon>
+              Sil
+            </button>
+            <div class="spacer"></div>
+            <button nbButton outline (click)="cancelEdit()">İptal</button>
+            <button 
+              nbButton 
+              status="primary" 
+              [disabled]="saving || !editingDocument.slug || !editingDocument.title"
+              (click)="editingDocument.id ? saveLegalDocument() : saveNewDocument()"
+            >
+              <nb-icon icon="save-outline" *ngIf="!saving"></nb-icon>
+              <nb-spinner *ngIf="saving" size="tiny" status="control"></nb-spinner>
+              {{ saving ? 'Kaydediliyor...' : (editingDocument.id ? 'Kaydet' : 'Oluştur') }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Editör placeholder -->
+        <div class="editor-placeholder" *ngIf="!editingDocument && legalDocuments.length > 0">
+          <nb-icon icon="file-text-outline"></nb-icon>
+          <p>Düzenlemek için bir döküman seçin</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

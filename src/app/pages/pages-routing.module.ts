@@ -12,7 +12,7 @@ const routes: Routes = [{
   children: [
     {
       path: 'dashboard',
-      component: ECommerceComponent,
+      component: DashboardComponent,
     },
     {
       path: 'iot-dashboard',
@@ -57,6 +57,56 @@ const routes: Routes = [{
       path: 'editors',
       loadChildren: () => import('./editors/editors.module')
         .then(m => m.EditorsModule),
+    },
+    {
+      path: 'products',
+      loadChildren: () => import('./products/products.module')
+        .then(m => m.ProductsModule),
+    },
+    {
+      path: 'orders',
+      loadChildren: () => import('./orders/orders.module')
+        .then(m => m.OrdersModule),
+    },
+    {
+      path: 'users',
+      loadChildren: () => import('./users/users.module')
+        .then(m => m.UsersModule),
+    },
+    {
+      path: 'generated-images',
+      loadChildren: () => import('./generated-images/generated-images.module')
+        .then(m => m.GeneratedImagesModule),
+    },
+    {
+      path: 'about',
+      loadChildren: () => import('./about/about.module')
+        .then(m => m.AboutModule),
+    },
+    {
+      path: 'site-settings',
+      loadChildren: () => import('./site-settings/site-settings.module')
+        .then(m => m.SiteSettingsModule),
+    },
+    {
+      path: 'legal-documents',
+      loadChildren: () => import('./legal-documents/legal-documents.module')
+        .then(m => m.LegalDocumentsModule),
+    },
+    {
+      path: 'contact-submissions',
+      loadChildren: () => import('./contact-submissions/contact-submissions.module')
+        .then(m => m.ContactSubmissionsModule),
+    },
+    {
+      path: 'newsletter',
+      loadChildren: () => import('./newsletter/newsletter.module')
+        .then(m => m.NewsletterModule),
+    },
+    {
+      path: 'settings',
+      loadChildren: () => import('./settings/settings.module')
+        .then(m => m.SettingsModule),
     },
     {
       path: 'tables',
