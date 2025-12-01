@@ -1,16 +1,19 @@
 # Build stage
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --legacy-peer-deps
+# Install dependencies (skip postinstall scripts)
+RUN npm ci --legacy-peer-deps --ignore-scripts
 
 # Copy source code
 COPY . .
+
+# Run Angular compatibility compiler
+RUN ./node_modules/.bin/ngcc --properties es2015 browser module main --first-only --create-ivy-entry-points || true
 
 # Build the Angular app for production
 RUN npm run build -- --configuration=production
