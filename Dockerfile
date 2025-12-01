@@ -18,18 +18,23 @@ RUN ./node_modules/.bin/ngcc --properties es2015 browser module main --first-onl
 # Build the Angular app for production
 RUN npm run build -- --configuration=production
 
-# Production stage - using nginx to serve static files
-FROM nginx:alpine
+# Production stage
+FROM node:20-alpine
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/nginx.conf
+WORKDIR /app
+
+# Install production dependencies
+RUN npm install express compression
 
 # Copy built app from build stage
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/dist ./dist
+
+# Copy server file
+COPY server.js ./
 
 # Railway uses dynamic PORT
 ENV PORT=80
 EXPOSE 80
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start the server
+CMD ["node", "server.js"]
