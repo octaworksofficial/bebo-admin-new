@@ -12,6 +12,7 @@ import {
   NbDialogModule
 } from '@nebular/theme';
 
+import { ThemeModule } from '../../@theme/theme.module';
 import { OrdersRoutingModule } from './orders-routing.module';
 import { OrdersComponent } from './orders.component';
 import { OrderListComponent } from './order-list/order-list.component';
@@ -27,6 +28,7 @@ import { OrderDetailComponent } from './order-detail/order-detail.component';
     CommonModule,
     FormsModule,
     OrdersRoutingModule,
+    ThemeModule,
     NbCardModule,
     NbButtonModule,
     NbInputModule,
