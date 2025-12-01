@@ -137,7 +137,7 @@
                 <nb-icon icon="flash-outline" class="credit-icon"></nb-icon>
               </div>
               <div class="credit-info">
-                <div class="credit-amount">{{ calculateCreditsFromAmount(getOrderTotal(order)) }}</div>
+                <div class="credit-amount">{{ order.creditAmount || 0 }}</div>
                 <div class="credit-label">Kredi</div>
               </div>
               <div class="credit-divider"></div>

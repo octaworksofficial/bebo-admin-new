@@ -155,11 +155,10 @@ export class OrderDetailComponent implements OnInit {
 
   calculateCreditsFromAmount(amountInTL: number): number {
     // Kredi fiyatlandırması - amountInTL zaten TL cinsinden (getOrderTotal'dan geliyor)
-    // 1 kredi = 5 TL (varsayılan)
-    // API'den gelen pricePerCredit değerini kullanmalıyız ama şimdilik sabit
-    const pricePerCredit = 5; // TL
+    // 1 kredi = 1.5 TL (150 kuruş) - Birebiro'nun gerçek fiyatlandırması
+    const pricePerCreditTL = 1.5;
     if (amountInTL <= 0) return 0;
-    return Math.round(amountInTL / pricePerCredit);
+    return Math.round(amountInTL / pricePerCreditTL);
   }
 
   onImageError(event: any): void {
