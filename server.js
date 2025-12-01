@@ -42,8 +42,8 @@ app.use(express.static(distPath, {
   etag: false
 }));
 
-// Handle Angular routing - send all requests to index.html
-app.get('*', (req, res) => {
+// Handle Angular routing - send all other requests to index.html
+app.use((req, res) => {
   const indexPath = path.join(distPath, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
