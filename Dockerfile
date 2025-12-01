@@ -27,7 +27,8 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Copy built app from build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 80
+# Railway uses dynamic PORT
+ENV PORT=80
 EXPOSE 80
 
 # Start nginx
