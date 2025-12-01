@@ -26,8 +26,8 @@ WORKDIR /app
 # Create minimal package.json for production dependencies
 RUN echo '{"name":"bebo-admin","version":"1.0.0"}' > package.json
 
-# Install production dependencies
-RUN npm install express compression --save
+# Install production dependencies (API + static serving)
+RUN npm install express@4 compression cors pg dotenv --save
 
 # Copy built app from build stage
 COPY --from=build /app/dist ./dist
@@ -36,8 +36,8 @@ COPY --from=build /app/dist ./dist
 COPY server.js ./
 
 # Railway uses dynamic PORT
-ENV PORT=80
-EXPOSE 80
+ENV PORT=8080
+EXPOSE 8080
 
 # Start the server
 CMD ["node", "server.js"]
