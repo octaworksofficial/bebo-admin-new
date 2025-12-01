@@ -91,7 +91,7 @@
           </div>
           <div class="stat-content">
             <span class="stat-label">Toplam Harcama</span>
-            <span class="stat-value">{{ user.totalSpent || 0 }} ₺</span>
+            <span class="stat-value">{{ (user.totalSpent || 0) / 100 | number:'1.2-2' }} ₺</span>
           </div>
         </div>
         
@@ -148,7 +148,7 @@
                   </span>
                 </td>
                 <td class="product">{{ order.productName || '-' }}</td>
-                <td class="amount">{{ order.totalAmount }} ₺</td>
+                <td class="amount">{{ (order.totalAmount || 0) / 100 | number:'1.2-2' }} ₺</td>
                 <td>
                   <span class="status-badge" [class]="'payment-' + order.paymentStatus">
                     {{ getPaymentStatusText(order.paymentStatus) }}

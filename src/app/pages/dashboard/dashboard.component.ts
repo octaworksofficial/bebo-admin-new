@@ -192,7 +192,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return `${date.getDate()}/${date.getMonth() + 1}`;
     });
     const counts = this.ordersChartData.map(d => Number(d.count));
-    const revenues = this.ordersChartData.map(d => Number(d.revenue));
+    // Kuruştan TL'ye çevir (100 kuruş = 1 TL)
+    const revenues = this.ordersChartData.map(d => Number(d.revenue) / 100);
 
     this.ordersChartOptions = {
       tooltip: {
@@ -380,7 +381,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   formatCurrency(amount: string | number): string {
-    return '₺' + Number(amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // Kuruştan TL'ye çevir (100 kuruş = 1 TL)
+    const tlAmount = Number(amount) / 100;
+    return '₺' + tlAmount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   formatNumber(num: string | number): string {

@@ -121,8 +121,8 @@
                   <div class="spec"><span>Çerçeve:</span> {{ order.frameName }} <i *ngIf="order.frameColorCode" class="color-dot" [style.background]="order.frameColorCode"></i></div>
                 </div>
                 <div class="prices">
-                  <div class="price-row"><span>Boyut:</span><span>{{ order.sizePrice || 0 }} TL</span></div>
-                  <div class="price-row"><span>Çerçeve:</span><span>{{ order.framePrice || 0 }} TL</span></div>
+                  <div class="price-row"><span>Boyut:</span><span>{{ kurusToTl(order.sizePrice) }} TL</span></div>
+                  <div class="price-row"><span>Çerçeve:</span><span>{{ kurusToTl(order.framePrice) }} TL</span></div>
                   <div class="price-row total"><span>Toplam:</span><span>{{ getOrderTotal(order) }} TL</span></div>
                 </div>
               </div>

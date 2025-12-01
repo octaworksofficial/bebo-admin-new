@@ -134,22 +134,28 @@ export class OrderDetailComponent implements OnInit {
 
   getOrderTotal(order: any): number {
     // Öncelik sırası: totalAmount -> paymentAmount -> (sizePrice + framePrice)
+    let total = 0;
     if (order.totalAmount != null) {
-      return order.totalAmount;
+      total = order.totalAmount;
+    } else if (order.paymentAmount != null) {
+      total = order.paymentAmount;
+    } else if (order.orderType === 'product') {
+      // Fiziksel ürün ise fiyatları topla
+      total = (order.sizePrice || 0) + (order.framePrice || 0);
     }
-    if (order.paymentAmount != null) {
-      return order.paymentAmount;
-    }
-    // Fiziksel ürün ise fiyatları topla
-    if (order.orderType === 'product') {
-      return (order.sizePrice || 0) + (order.framePrice || 0);
-    }
-    return 0;
+    // Kuruştan TL'ye çevir (100 kuruş = 1 TL)
+    return total / 100;
+  }
+
+  // Kuruştan TL'ye çevirme helper metodu
+  kurusToTl(kurus: number | null | undefined): number {
+    if (kurus == null) return 0;
+    return kurus / 100;
   }
 
   calculateCreditsFromAmount(amount: number): number {
-    // Kredi fiyatlandırması - örneğin: 10 TL = 1 kredi
-    // Bu değeri gerçek fiyatlandırmanıza göre ayarlayın
+    // Kredi fiyatlandırması - amount zaten TL cinsinden (getOrderTotal'dan geliyor)
+    // Örneğin: 10 TL = 1 kredi
     return Math.floor(amount / 10);
   }
 

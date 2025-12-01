@@ -123,8 +123,8 @@
           </td>
           <td class="amount">
             <!-- Fiziksel ürün siparişi ise paymentAmount, değilse totalAmount -->
-            <span *ngIf="order.orderType === 'product' && order.generationId">{{ order.paymentAmount | number:'1.0-0' }} ₺</span>
-            <span *ngIf="order.orderType !== 'product' || !order.generationId">{{ order.totalAmount | number:'1.0-0' }} ₺</span>
+            <span *ngIf="order.orderType === 'product' && order.generationId">{{ order.paymentAmount | kurusToTl }} ₺</span>
+            <span *ngIf="order.orderType !== 'product' || !order.generationId">{{ order.totalAmount | kurusToTl }} ₺</span>
           </td>
           <td>
             <span class="status-badge" [class]="'payment-' + order.paymentStatus">

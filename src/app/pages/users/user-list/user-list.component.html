@@ -97,7 +97,7 @@
             {{ user.artCredits || 0 }}
           </td>
           <td class="orders">{{ user.totalOrders || 0 }}</td>
-          <td class="spent">{{ user.totalSpent || 0 }} ₺</td>
+          <td class="spent">{{ (user.totalSpent || 0) / 100 | number:'1.2-2' }} ₺</td>
           <td class="date">{{ user.createdAt | date:'dd MMM yy' }}</td>
           <td class="action">
             <nb-icon icon="chevron-right-outline"></nb-icon>
