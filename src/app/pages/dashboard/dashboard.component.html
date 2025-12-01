@@ -196,7 +196,6 @@
               <span class="order-customer">{{ order.userName || order.userEmail || 'Misafir' }}</span>
             </div>
             <div class="order-amount">{{ formatCurrency(order.totalAmount) }}</div>
-            <nb-badge [text]="statusLabels[order.status] || order.status" [status]="getStatusClass(order.status)" class="order-badge"></nb-badge>
           </div>
           <div *ngIf="recentOrders.length === 0" class="empty-state">
             <nb-icon icon="inbox-outline"></nb-icon>
