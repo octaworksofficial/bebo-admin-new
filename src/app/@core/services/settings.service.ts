@@ -23,7 +23,7 @@ export interface SiteSetting {
   key: string;
   value: string;
   valueType: 'text' | 'email' | 'phone' | 'url' | 'textarea';
-  category: 'contact' | 'social' | 'general';
+  category: 'contact' | 'company' | 'social' | 'general';
   label?: string;
   description?: string;
   isPublic: boolean;
