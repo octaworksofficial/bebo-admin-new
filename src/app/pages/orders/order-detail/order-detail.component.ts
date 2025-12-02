@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NbDialogRef } from '@nebular/theme';
+import { NbDialogRef, NbToastrService } from '@nebular/theme';
 import { OrdersService } from '../../../@core/services/orders.service';
 
 @Component({
@@ -13,9 +13,14 @@ export class OrderDetailComponent implements OnInit {
   order: any = null;
   loading = true;
   saving = false;
+  refunding = false;
   error: string = null;
   hasChanges = false; // Güncelleme yapıldı mı?
   imageLoading = true; // Görsel yükleniyor mu?
+
+  // Refund dialog
+  showRefundConfirm = false;
+  refundReason = '';
 
   // Form models
   trackingNumber: string = '';
@@ -32,7 +37,8 @@ export class OrderDetailComponent implements OnInit {
 
   constructor(
     protected ref: NbDialogRef<OrderDetailComponent>,
-    private ordersService: OrdersService
+    private ordersService: OrdersService,
+    private toastrService: NbToastrService
   ) {}
 
   ngOnInit() {
@@ -210,6 +216,53 @@ export class OrderDetailComponent implements OnInit {
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
+    });
+  }
+
+  // ==================== REFUND (İADE) ====================
+  showRefundDialog(): void {
+    this.showRefundConfirm = true;
+    this.refundReason = '';
+  }
+
+  cancelRefund(): void {
+    this.showRefundConfirm = false;
+    this.refundReason = '';
+  }
+
+  confirmRefund(): void {
+    if (this.refunding) return;
+    
+    this.refunding = true;
+    
+    // Tam iade yapılacak (amount parametresi gönderilmezse API tam iade yapar)
+    this.ordersService.refundOrder(this.orderId, undefined, this.refundReason).subscribe({
+      next: (response) => {
+        this.refunding = false;
+        this.showRefundConfirm = false;
+        
+        if (response.success) {
+          this.toastrService.success(
+            `${response.refundAmount} TL iade edildi`,
+            'İade Başarılı',
+            { duration: 5000 }
+          );
+          this.hasChanges = true;
+          this.loadOrderDetail(); // Siparişi yeniden yükle
+        } else {
+          this.toastrService.danger(
+            response.error || 'İade işlemi başarısız',
+            'Hata',
+            { duration: 5000 }
+          );
+        }
+      },
+      error: (err) => {
+        this.refunding = false;
+        console.error('Refund error:', err);
+        const errorMsg = err.error?.error || 'İade işlemi sırasında hata oluştu';
+        this.toastrService.danger(errorMsg, 'Hata', { duration: 5000 });
+      }
     });
   }
 

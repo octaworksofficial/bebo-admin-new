@@ -4,6 +4,16 @@ import { HttpParams } from '@angular/common/http';
 import { BaseApiService } from './base-api.service';
 import { Order } from '../models';
 
+export interface RefundResponse {
+  success: boolean;
+  message?: string;
+  refundAmount?: string;
+  merchantOid?: string;
+  isTest?: boolean;
+  error?: string;
+  errorCode?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -45,6 +55,19 @@ export class OrdersService extends BaseApiService {
 
   updateOrderNotes(id: number, notes: string): Observable<Order> {
     return this.patch<Order>(`${this.endpoint}/${id}/notes`, { notes });
+  }
+
+  /**
+   * PayTR üzerinden sipariş iadesi yapar
+   * @param id Sipariş ID
+   * @param amount İade tutarı (kuruş cinsinden, opsiyonel - boş bırakılırsa tam iade)
+   * @param reason İade nedeni
+   */
+  refundOrder(id: number, amount?: number, reason?: string): Observable<RefundResponse> {
+    return this.http.post<RefundResponse>(`${this.apiUrl}${this.endpoint}/${id}/refund`, {
+      amount,
+      reason,
+    });
   }
 
   getOrderStatistics(): Observable<{

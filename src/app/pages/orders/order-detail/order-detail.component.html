@@ -95,6 +95,13 @@
           <span class="label">Tip</span>
           <nb-badge [status]="order.orderType === 'credit' ? 'warning' : 'info'" [text]="order.orderType === 'credit' ? 'Kredi' : 'Ürün'"></nb-badge>
         </div>
+        <!-- İade Butonu - Sadece başarılı ödemelerde göster -->
+        <div class="status-item refund-action" *ngIf="order.paymentStatus === 'success'">
+          <button nbButton status="danger" size="small" outline (click)="showRefundDialog()" [disabled]="refunding">
+            <nb-icon icon="undo-outline"></nb-icon>
+            İade Et
+          </button>
+        </div>
       </div>
 
       <!-- Main Grid -->
@@ -292,6 +299,38 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- Refund Dialog -->
+      <div *ngIf="showRefundConfirm" class="refund-dialog-overlay" (click)="cancelRefund()">
+        <div class="refund-dialog" (click)="$event.stopPropagation()">
+          <div class="refund-dialog-header">
+            <nb-icon icon="alert-triangle-outline" status="danger"></nb-icon>
+            <h6>İade Onayı</h6>
+          </div>
+          <div class="refund-dialog-body">
+            <p>
+              <strong>Sipariş #{{ order.id }}</strong> için
+              <strong>{{ getOrderTotal(order) }} TL</strong> tutarında
+              PayTR üzerinden iade işlemi yapılacak.
+            </p>
+            <p class="warning-text">
+              <nb-icon icon="alert-circle-outline"></nb-icon>
+              Bu işlem geri alınamaz!
+            </p>
+            <div class="refund-reason">
+              <label>İade Nedeni (opsiyonel)</label>
+              <textarea nbInput [(ngModel)]="refundReason" placeholder="İade nedenini girin..." fullWidth rows="2"></textarea>
+            </div>
+          </div>
+          <div class="refund-dialog-actions">
+            <button nbButton status="basic" (click)="cancelRefund()" [disabled]="refunding">İptal</button>
+            <button nbButton status="danger" (click)="confirmRefund()" [disabled]="refunding" [nbSpinner]="refunding">
+              <nb-icon icon="undo-outline"></nb-icon>
+              İade Et
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>

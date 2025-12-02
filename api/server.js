@@ -662,6 +662,152 @@ app.patch('/api/orders/:id/notes', async (req, res) => {
   }
 });
 
+// ==================== PAYTR REFUND API ====================
+const crypto = require('crypto');
+const https = require('https');
+const querystring = require('querystring');
+
+// PayTR İade işlemi
+app.post('/api/orders/:id/refund', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount, reason } = req.body; // amount: iade tutarı (kuruş cinsinden), reason: iade nedeni
+    
+    // Sipariş bilgisini al
+    const orderResult = await pool.query(`
+      SELECT 
+        id,
+        merchant_oid as "merchantOid",
+        payment_amount as "paymentAmount",
+        total_amount as "totalAmount",
+        payment_status as "paymentStatus",
+        currency
+      FROM "order" 
+      WHERE id = $1
+    `, [id]);
+    
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Sipariş bulunamadı' });
+    }
+    
+    const order = orderResult.rows[0];
+    
+    // Sadece başarılı ödemelerde iade yapılabilir
+    if (order.paymentStatus !== 'success') {
+      return res.status(400).json({ error: 'Sadece başarılı ödemelerde iade yapılabilir' });
+    }
+    
+    // İade tutarını belirle (tam iade veya kısmi iade)
+    const orderTotal = order.totalAmount || order.paymentAmount;
+    const refundAmount = amount ? parseFloat(amount) : orderTotal;
+    
+    // İade tutarı sipariş tutarından fazla olamaz
+    if (refundAmount > orderTotal) {
+      return res.status(400).json({ error: 'İade tutarı sipariş tutarından fazla olamaz' });
+    }
+    
+    // PayTR API bilgileri
+    const merchantId = process.env.PAYTR_MERCHANT_ID;
+    const merchantKey = process.env.PAYTR_MERCHANT_KEY;
+    const merchantSalt = process.env.PAYTR_MERCHANT_SALT;
+    
+    if (!merchantId || !merchantKey || !merchantSalt) {
+      console.error('PayTR credentials missing');
+      return res.status(500).json({ error: 'PayTR yapılandırması eksik' });
+    }
+    
+    // İade tutarını TL formatına çevir (kuruştan TL'ye, 2 ondalık)
+    const returnAmountTL = (refundAmount / 100).toFixed(2);
+    
+    // PayTR token oluştur
+    // Token: base64(hmac_sha256(merchant_id + merchant_oid + return_amount + merchant_salt, merchant_key))
+    const hashStr = merchantId + order.merchantOid + returnAmountTL + merchantSalt;
+    const paytrToken = crypto
+      .createHmac('sha256', merchantKey)
+      .update(hashStr)
+      .digest('base64');
+    
+    // PayTR'a iade isteği gönder
+    const postData = querystring.stringify({
+      merchant_id: merchantId,
+      merchant_oid: order.merchantOid,
+      return_amount: returnAmountTL,
+      paytr_token: paytrToken,
+      reference_no: `REFUND_${id}_${Date.now()}`
+    });
+    
+    const options = {
+      hostname: 'www.paytr.com',
+      port: 443,
+      path: '/odeme/iade',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+    
+    // PayTR'a istek at
+    const paytrResponse = await new Promise((resolve, reject) => {
+      const req = https.request(options, (response) => {
+        let data = '';
+        response.on('data', chunk => data += chunk);
+        response.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(new Error('PayTR yanıtı parse edilemedi: ' + data));
+          }
+        });
+      });
+      
+      req.on('error', (e) => reject(e));
+      req.setTimeout(90000, () => {
+        req.destroy();
+        reject(new Error('PayTR isteği zaman aşımına uğradı'));
+      });
+      
+      req.write(postData);
+      req.end();
+    });
+    
+    console.log('PayTR Refund Response:', paytrResponse);
+    
+    // PayTR yanıtını kontrol et
+    if (paytrResponse.status === 'success') {
+      // Veritabanında siparişi güncelle
+      await pool.query(`
+        UPDATE "order" 
+        SET 
+          payment_status = 'refunded',
+          notes = COALESCE(notes, '') || E'\n\n[İADE] ' || $1 || ' - Tutar: ' || $2 || ' TL - Tarih: ' || NOW()::text,
+          updated_at = NOW()
+        WHERE id = $3
+      `, [reason || 'İade yapıldı', returnAmountTL, id]);
+      
+      res.json({
+        success: true,
+        message: 'İade işlemi başarılı',
+        refundAmount: returnAmountTL,
+        merchantOid: order.merchantOid,
+        isTest: paytrResponse.is_test === 1
+      });
+    } else {
+      // PayTR hatası
+      console.error('PayTR refund error:', paytrResponse);
+      res.status(400).json({
+        success: false,
+        error: paytrResponse.err_msg || 'İade işlemi başarısız',
+        errorCode: paytrResponse.err_no
+      });
+    }
+    
+  } catch (error) {
+    console.error('Refund error:', error);
+    res.status(500).json({ error: 'İade işlemi sırasında hata oluştu: ' + error.message });
+  }
+});
+
 // ==================== USERS API ====================
 app.get('/api/users', async (req, res) => {
   try {
