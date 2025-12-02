@@ -428,6 +428,82 @@
                     </div>
                   </div>
                 </div>
+                
+                <!-- Mockup Template Section -->
+                <div class="mockup-section">
+                  <h6 class="section-subtitle">
+                    <nb-icon icon="image-outline"></nb-icon>
+                    Mockup Ön İzleme Ayarları
+                  </h6>
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label class="label">Mockup Template URL</label>
+                        <div class="image-input-group">
+                          <div class="image-preview mockup-preview" *ngIf="frameForm.get('mockupTemplate')?.value">
+                            <img [src]="frameForm.get('mockupTemplate')?.value" 
+                                 (click)="openImage(frameForm.get('mockupTemplate')?.value)"
+                                 alt="Mockup Template"
+                                 class="thumbnail">
+                          </div>
+                          <div class="input-with-upload">
+                            <input type="text" nbInput fullWidth formControlName="mockupTemplate" placeholder="https://cdn.example.com/mockups/siyah-cerceve.png">
+                            <div class="upload-button">
+                              <input type="file" #mockupTemplateInput accept="image/*" (change)="onMockupTemplateSelect($event)" hidden>
+                              <button nbButton status="primary" size="small" type="button"
+                                      [disabled]="uploadingMockupTemplate"
+                                      (click)="mockupTemplateInput.click()">
+                                <nb-icon *ngIf="!uploadingMockupTemplate" icon="cloud-upload-outline"></nb-icon>
+                                <nb-spinner *ngIf="uploadingMockupTemplate" size="tiny" status="control"></nb-spinner>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <small class="form-text text-muted">Çerçevenin mockup önizleme görseli (üretilen görsel bu template üzerine yerleştirilir)</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <div class="form-group">
+                        <label class="label">Config Tipi</label>
+                        <input type="text" nbInput fullWidth formControlName="mockupConfigType" placeholder="frame">
+                        <small class="form-text text-muted">Örn: frame, canvas, poster</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="label">X Pozisyonu (%)</label>
+                        <input type="number" nbInput fullWidth formControlName="mockupConfigX" placeholder="12" min="0" max="100" step="1">
+                        <small class="form-text text-muted">Sol kenardan uzaklık</small>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="label">Y Pozisyonu (%)</label>
+                        <input type="number" nbInput fullWidth formControlName="mockupConfigY" placeholder="15" min="0" max="100" step="1">
+                        <small class="form-text text-muted">Üst kenardan uzaklık</small>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="label">Genişlik (%)</label>
+                        <input type="number" nbInput fullWidth formControlName="mockupConfigWidth" placeholder="76" min="1" max="100" step="1">
+                        <small class="form-text text-muted">Görsel genişliği</small>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="label">Yükseklik (%)</label>
+                        <input type="number" nbInput fullWidth formControlName="mockupConfigHeight" placeholder="70" min="1" max="100" step="1">
+                        <small class="form-text text-muted">Görsel yüksekliği</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
                 <div class="form-actions">
                   <button nbButton status="success" size="small" type="button" (click)="saveFrame()" [disabled]="frameForm.invalid || savingFrame" [nbSpinner]="savingFrame">
                     {{ editingFrameId ? 'Güncelle' : 'Ekle' }}

@@ -40,6 +40,7 @@ export class ProductFormComponent implements OnInit {
   uploadingWideImage = false;
   uploadingFrameImage = false;
   uploadingFrameImageLarge = false;
+  uploadingMockupTemplate = false;
 
   constructor(
     private fb: FormBuilder,
@@ -109,6 +110,12 @@ export class ProductFormComponent implements OnInit {
       colorCode: ['#000000'],
       frameImage: [''],
       frameImageLarge: [''],
+      mockupTemplate: [''],
+      mockupConfigType: ['frame'],
+      mockupConfigX: [12],
+      mockupConfigY: [15],
+      mockupConfigWidth: [76],
+      mockupConfigHeight: [70],
       sortOrder: [0],
     });
   }
@@ -248,15 +255,43 @@ export class ProductFormComponent implements OnInit {
   
   addFrame(): void {
     this.editingFrameId = null;
-    this.frameForm.reset({ sortOrder: this.frames.length, priceAmount: 0, colorCode: '#000000' });
+    this.frameForm.reset({ 
+      sortOrder: this.frames.length, 
+      priceAmount: 0, 
+      colorCode: '#000000',
+      mockupConfigType: 'frame',
+      mockupConfigX: 12,
+      mockupConfigY: 15,
+      mockupConfigWidth: 76,
+      mockupConfigHeight: 70
+    });
     this.showFrameForm = true;
   }
 
   editFrame(frame: ProductFrame): void {
     this.editingFrameId = frame.id;
+    
+    // Parse mockup config if exists
+    let mockupConfig = { type: 'frame', x: 12, y: 15, width: 76, height: 70 };
+    if ((frame as any).mockupConfig) {
+      try {
+        mockupConfig = typeof (frame as any).mockupConfig === 'string' 
+          ? JSON.parse((frame as any).mockupConfig) 
+          : (frame as any).mockupConfig;
+      } catch (e) {
+        console.error('Error parsing mockup config:', e);
+      }
+    }
+    
     this.frameForm.patchValue({
       ...frame,
       priceAmount: frame.priceAmount / 100, // Convert from cents to TL
+      mockupTemplate: (frame as any).mockupTemplate || '',
+      mockupConfigType: mockupConfig.type || 'frame',
+      mockupConfigX: mockupConfig.x || 12,
+      mockupConfigY: mockupConfig.y || 15,
+      mockupConfigWidth: mockupConfig.width || 76,
+      mockupConfigHeight: mockupConfig.height || 70,
     });
     this.showFrameForm = true;
   }
@@ -274,9 +309,29 @@ export class ProductFormComponent implements OnInit {
     }
 
     this.savingFrame = true;
+    const formValue = this.frameForm.value;
+    
+    // Build mockup config JSON with type
+    const mockupConfig = JSON.stringify({
+      type: formValue.mockupConfigType || 'frame',
+      x: formValue.mockupConfigX || 12,
+      y: formValue.mockupConfigY || 15,
+      width: formValue.mockupConfigWidth || 76,
+      height: formValue.mockupConfigHeight || 70
+    });
+    
     const frameData = {
-      ...this.frameForm.value,
-      priceAmount: Math.round(this.frameForm.value.priceAmount * 100), // Convert to cents
+      slug: formValue.slug,
+      name: formValue.name,
+      nameEn: formValue.nameEn,
+      nameFr: formValue.nameFr,
+      priceAmount: Math.round(formValue.priceAmount * 100), // Convert to cents
+      colorCode: formValue.colorCode,
+      frameImage: formValue.frameImage,
+      frameImageLarge: formValue.frameImageLarge,
+      mockupTemplate: formValue.mockupTemplate,
+      mockupConfig: mockupConfig,
+      sortOrder: formValue.sortOrder,
     };
 
     const request = this.editingFrameId
@@ -398,6 +453,25 @@ export class ProductFormComponent implements OnInit {
         error: (error) => {
           console.error('Frame large image upload error:', error);
           this.uploadingFrameImageLarge = false;
+          this.toastrService.danger('Görsel yüklenemedi', 'Hata');
+        },
+      });
+    }
+  }
+
+  onMockupTemplateSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.uploadingMockupTemplate = true;
+      this.imageUploadService.upload(input.files[0]).subscribe({
+        next: (response) => {
+          this.frameForm.patchValue({ mockupTemplate: response.imageUrl });
+          this.uploadingMockupTemplate = false;
+          this.toastrService.success('Mockup template yüklendi', 'Başarılı');
+        },
+        error: (error) => {
+          console.error('Mockup template upload error:', error);
+          this.uploadingMockupTemplate = false;
           this.toastrService.danger('Görsel yüklenemedi', 'Hata');
         },
       });
