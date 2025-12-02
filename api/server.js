@@ -1683,7 +1683,16 @@ app.get('/api/art-credit-settings', async (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Birebiro Admin API is running' });
+  res.json({ 
+    status: 'ok', 
+    message: 'Birebiro Admin API is running',
+    version: '2.1.0',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      siteSettings: true,
+      refund: true
+    }
+  });
 });
 
 // 404 handler
