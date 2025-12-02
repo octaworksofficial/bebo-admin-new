@@ -17,6 +17,19 @@ export interface SiteSettings {
   [key: string]: string | undefined;
 }
 
+// Yeni site_settings tablosu için interface
+export interface SiteSetting {
+  id?: number;
+  key: string;
+  value: string;
+  valueType: 'text' | 'email' | 'phone' | 'url' | 'textarea';
+  category: 'contact' | 'social' | 'general';
+  label?: string;
+  description?: string;
+  isPublic: boolean;
+  updatedAt?: string;
+}
+
 export interface AboutContent {
   id?: number;
   language: string;
@@ -52,6 +65,7 @@ export interface LegalDocument {
 export class SettingsService extends BaseApiService {
   private creditSettingsEndpoint = '/credit-settings';
   private siteSettingsEndpoint = '/settings';
+  private newSiteSettingsEndpoint = '/site-settings';
   private aboutContentEndpoint = '/about-content';
   private legalDocumentsEndpoint = '/legal-documents';
 
@@ -111,5 +125,42 @@ export class SettingsService extends BaseApiService {
 
   deleteLegalDocument(id: number): Observable<{ message: string }> {
     return this.delete<{ message: string }>(`${this.legalDocumentsEndpoint}/${id}`);
+  }
+
+  // ==================== NEW SITE SETTINGS (site_settings table) ====================
+
+  // Get all site settings
+  getAllSiteSettings(): Observable<SiteSetting[]> {
+    return this.get<SiteSetting[]>(this.newSiteSettingsEndpoint);
+  }
+
+  // Get site settings by category
+  getSiteSettingsByCategory(category: string): Observable<SiteSetting[]> {
+    return this.get<SiteSetting[]>(`${this.newSiteSettingsEndpoint}/category/${category}`);
+  }
+
+  // Get single site setting by key
+  getSiteSettingByKey(key: string): Observable<SiteSetting> {
+    return this.get<SiteSetting>(`${this.newSiteSettingsEndpoint}/key/${key}`);
+  }
+
+  // Create or update single site setting
+  upsertSiteSetting(key: string, setting: Partial<SiteSetting>): Observable<{ success: boolean; id: number; message: string }> {
+    return this.put<{ success: boolean; id: number; message: string }>(`${this.newSiteSettingsEndpoint}/${key}`, setting);
+  }
+
+  // Bulk update site settings
+  bulkUpdateSiteSettings(settings: SiteSetting[]): Observable<{ success: boolean; message: string }> {
+    return this.put<{ success: boolean; message: string }>(this.newSiteSettingsEndpoint, settings);
+  }
+
+  // Delete site setting
+  deleteSiteSetting(key: string): Observable<{ success: boolean; message: string }> {
+    return this.delete<{ success: boolean; message: string }>(`${this.newSiteSettingsEndpoint}/${key}`);
+  }
+
+  // Get public settings (for frontend)
+  getPublicSiteSettings(): Observable<{ [key: string]: string }> {
+    return this.get<{ [key: string]: string }>(`${this.newSiteSettingsEndpoint}/public`);
   }
 }
