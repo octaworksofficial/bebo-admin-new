@@ -2211,19 +2211,17 @@ app.get('/api/dashboard/orders-by-status', async (req, res) => {
 app.get('/api/dashboard/top-products', async (req, res) => {
   try {
     const days = parseInt(req.query.days) || null;
-    const dateFilter = getDateFilter(days, 'o.created_at');
+    const dateFilter = days ? `AND o.created_at >= NOW() - INTERVAL '${days} days'` : '';
     
     const result = await pool.query(`
       SELECT 
         p.id,
         p.name,
         p.image_square_url as "imageUrl",
-        COUNT(oi.id) as "orderCount",
-        COALESCE(SUM(CAST(oi.price AS DECIMAL)), 0) as "totalRevenue"
+        COUNT(o.id) as "orderCount",
+        COALESCE(SUM(CAST(o.total_amount AS DECIMAL)), 0) as "totalRevenue"
       FROM product p
-      LEFT JOIN order_item oi ON p.id = oi.product_id
-      LEFT JOIN "order" o ON oi.order_id = o.id
-      ${dateFilter ? `WHERE ${dateFilter}` : ''}
+      LEFT JOIN "order" o ON p.id = o.product_id ${dateFilter}
       GROUP BY p.id, p.name, p.image_square_url
       ORDER BY "orderCount" DESC
       LIMIT 5
