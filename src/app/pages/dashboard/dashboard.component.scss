@@ -198,6 +198,7 @@
   
   .chart-card {
     border-radius: 1rem;
+    overflow: hidden; // İçerik taşmasını önle
     
     nb-card-header {
       border-bottom: 1px solid nb-theme(border-basic-color-3);
@@ -212,6 +213,11 @@
     
     nb-card-body {
       padding: 1.5rem;
+      overflow: hidden; // Chart taşmasını önle
+      
+      @media (max-width: 1400px) {
+        padding: 1rem;
+      }
     }
   }
   
@@ -223,6 +229,15 @@
   .pie-chart {
     height: 320px;
     width: 100%;
+    min-width: 0; // Flexbox overflow fix
+    
+    @media (max-width: 1400px) {
+      height: 280px;
+    }
+    
+    @media (max-width: 768px) {
+      height: 350px; // Legend altta olunca daha fazla yükseklik
+    }
   }
   
   // Data Cards

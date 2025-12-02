@@ -121,7 +121,21 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     private http: HttpClient,
     private themeService: NbThemeService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    // Resize event'i dinle ve chart'ları güncelle
+    this.onResize = this.onResize.bind(this);
+  }
+
+  private onResize() {
+    // Debounce için timeout kullan
+    clearTimeout(this.resizeTimeout);
+    this.resizeTimeout = setTimeout(() => {
+      this.updateStatusPieChart();
+      this.cdr.detectChanges();
+    }, 200);
+  }
+  
+  private resizeTimeout: any;
 
   ngOnInit() {
     // Theme subscription'ı başlat
@@ -131,6 +145,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.currentTheme = config.name;
         this.updateChartTheme(config);
       });
+    
+    // Resize listener ekle
+    window.addEventListener('resize', this.onResize);
   }
 
   ngAfterViewInit() {
@@ -143,6 +160,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy() {
     this.alive = false;
+    window.removeEventListener('resize', this.onResize);
+    clearTimeout(this.resizeTimeout);
   }
 
   onPeriodChange(period: string) {
@@ -355,6 +374,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       itemStyle: { color: this.statusColors[item.status] || '#8f9bb3' }
     }));
 
+    // Ekran genişliğine göre responsive ayarlar
+    const isSmallScreen = window.innerWidth < 1400;
+    const isMobileScreen = window.innerWidth < 768;
+
     this.statusPieOptions = {
       tooltip: {
         trigger: 'item',
@@ -364,19 +387,20 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         textStyle: { color: '#fff' }
       },
       legend: {
-        orient: 'vertical',
-        right: 10,
-        top: 'center',
-        textStyle: { color: '#8f9bb3', fontSize: 12 },
-        itemWidth: 12,
-        itemHeight: 12,
-        itemGap: 12
+        orient: isMobileScreen ? 'horizontal' : 'vertical',
+        right: isMobileScreen ? 'center' : 10,
+        top: isMobileScreen ? 'bottom' : 'center',
+        left: isMobileScreen ? 'center' : 'auto',
+        textStyle: { color: '#8f9bb3', fontSize: 11 },
+        itemWidth: 10,
+        itemHeight: 10,
+        itemGap: isMobileScreen ? 8 : 10
       },
       series: [{
         name: 'Sipariş Durumu',
         type: 'pie',
-        radius: ['55%', '75%'],
-        center: ['35%', '50%'],
+        radius: isSmallScreen ? ['45%', '65%'] : ['55%', '75%'],
+        center: isMobileScreen ? ['50%', '40%'] : (isSmallScreen ? ['40%', '50%'] : ['35%', '50%']),
         avoidLabelOverlap: false,
         itemStyle: {
           borderRadius: 6
@@ -385,7 +409,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         emphasis: {
           label: {
             show: true,
-            fontSize: '16',
+            fontSize: '14',
             fontWeight: 'bold',
             color: '#fff'
           },
