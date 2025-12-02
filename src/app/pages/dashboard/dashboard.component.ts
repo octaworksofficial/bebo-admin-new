@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { NbThemeService } from '@nebular/theme';
 import { takeWhile } from 'rxjs/operators';
@@ -63,9 +63,11 @@ interface TopProduct {
   styleUrls: ['./dashboard.component.scss'],
   templateUrl: './dashboard.component.html',
 })
-export class DashboardComponent implements OnInit, OnDestroy {
+export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private alive = true;
   private apiUrl = environment.apiUrl;
+  
+  loading = true; // Loading state eklendi
 
   stats: DashboardStats | null = null;
   recentOrders: RecentOrder[] = [];
@@ -117,18 +119,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private http: HttpClient,
-    private themeService: NbThemeService
+    private themeService: NbThemeService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.loadDashboardData();
-    
+    // Theme subscription'ı başlat
     this.themeSubscription = this.themeService.getJsTheme()
       .pipe(takeWhile(() => this.alive))
       .subscribe(config => {
         this.currentTheme = config.name;
         this.updateChartTheme(config);
       });
+  }
+
+  ngAfterViewInit() {
+    // View hazır olduktan sonra verileri yükle
+    setTimeout(() => {
+      this.loadDashboardData();
+      this.cdr.detectChanges();
+    }, 100);
   }
 
   ngOnDestroy() {
@@ -141,44 +151,79 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadDashboardData() {
+    this.loading = true;
     const period = this.selectedPeriod;
+    let loadedCount = 0;
+    const totalRequests = 6;
+    
+    const checkLoaded = () => {
+      loadedCount++;
+      if (loadedCount >= totalRequests) {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    };
     
     // Load stats
     this.http.get<DashboardStats>(`${this.apiUrl}/dashboard/stats?period=${period}`)
-      .subscribe(data => {
-        this.stats = data;
+      .subscribe({
+        next: (data) => {
+          this.stats = data;
+          checkLoaded();
+        },
+        error: () => checkLoaded()
       });
 
     // Load recent orders
     this.http.get<RecentOrder[]>(`${this.apiUrl}/dashboard/recent-orders`)
-      .subscribe(data => {
-        this.recentOrders = data;
+      .subscribe({
+        next: (data) => {
+          this.recentOrders = data;
+          checkLoaded();
+        },
+        error: () => checkLoaded()
       });
 
     // Load recent users
     this.http.get<RecentUser[]>(`${this.apiUrl}/dashboard/recent-users`)
-      .subscribe(data => {
-        this.recentUsers = data;
+      .subscribe({
+        next: (data) => {
+          this.recentUsers = data;
+          checkLoaded();
+        },
+        error: () => checkLoaded()
       });
 
     // Load orders chart data
     this.http.get<OrderChartData[]>(`${this.apiUrl}/dashboard/orders-chart?period=${period}`)
-      .subscribe(data => {
-        this.ordersChartData = data;
-        this.updateOrdersChart();
+      .subscribe({
+        next: (data) => {
+          this.ordersChartData = data;
+          this.updateOrdersChart();
+          checkLoaded();
+        },
+        error: () => checkLoaded()
       });
 
     // Load orders by status
     this.http.get<OrdersByStatus[]>(`${this.apiUrl}/dashboard/orders-by-status?period=${period}`)
-      .subscribe(data => {
-        this.ordersByStatus = data;
-        this.updateStatusPieChart();
+      .subscribe({
+        next: (data) => {
+          this.ordersByStatus = data;
+          this.updateStatusPieChart();
+          checkLoaded();
+        },
+        error: () => checkLoaded()
       });
 
     // Load top products
     this.http.get<TopProduct[]>(`${this.apiUrl}/dashboard/top-products?period=${period}`)
-      .subscribe(data => {
-        this.topProducts = data;
+      .subscribe({
+        next: (data) => {
+          this.topProducts = data;
+          checkLoaded();
+        },
+        error: () => checkLoaded()
       });
   }
 
