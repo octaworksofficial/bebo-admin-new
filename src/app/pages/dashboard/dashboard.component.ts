@@ -374,10 +374,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       itemStyle: { color: this.statusColors[item.status] || '#8f9bb3' }
     }));
 
-    // Ekran genişliğine göre responsive ayarlar
-    const isSmallScreen = window.innerWidth < 1400;
-    const isMobileScreen = window.innerWidth < 768;
-
     this.statusPieOptions = {
       tooltip: {
         trigger: 'item',
@@ -387,20 +383,19 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         textStyle: { color: '#fff' }
       },
       legend: {
-        orient: isMobileScreen ? 'horizontal' : 'vertical',
-        right: isMobileScreen ? 'center' : 10,
-        top: isMobileScreen ? 'bottom' : 'center',
-        left: isMobileScreen ? 'center' : 'auto',
+        orient: 'horizontal',
+        bottom: 10,
+        left: 'center',
         textStyle: { color: '#8f9bb3', fontSize: 11 },
         itemWidth: 10,
         itemHeight: 10,
-        itemGap: isMobileScreen ? 8 : 10
+        itemGap: 15
       },
       series: [{
         name: 'Sipariş Durumu',
         type: 'pie',
-        radius: isSmallScreen ? ['45%', '65%'] : ['55%', '75%'],
-        center: isMobileScreen ? ['50%', '40%'] : (isSmallScreen ? ['40%', '50%'] : ['35%', '50%']),
+        radius: ['40%', '60%'],
+        center: ['50%', '45%'],
         avoidLabelOverlap: false,
         itemStyle: {
           borderRadius: 6

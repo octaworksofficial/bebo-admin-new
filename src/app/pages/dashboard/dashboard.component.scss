@@ -227,17 +227,9 @@
   }
   
   .pie-chart {
-    height: 320px;
+    height: 280px;
     width: 100%;
-    min-width: 0; // Flexbox overflow fix
-    
-    @media (max-width: 1400px) {
-      height: 280px;
-    }
-    
-    @media (max-width: 768px) {
-      height: 350px; // Legend altta olunca daha fazla yükseklik
-    }
+    min-width: 0;
   }
   
   // Data Cards
