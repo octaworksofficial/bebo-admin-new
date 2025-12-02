@@ -34,6 +34,8 @@ export class SiteSettingsComponent implements OnInit {
     { key: 'support_email', label: 'Destek E-posta', valueType: 'email', category: 'contact', placeholder: 'destek@birebiro.com', icon: 'email-outline', description: 'Müşteri destek e-posta adresi', isPublic: true },
     { key: 'contact_phone', label: 'Telefon', valueType: 'phone', category: 'contact', placeholder: '+90 555 123 45 67', icon: 'phone-outline', description: 'İletişim telefon numarası', isPublic: true },
     { key: 'whatsapp_number', label: 'WhatsApp', valueType: 'phone', category: 'contact', placeholder: '+90 555 123 45 67', icon: 'message-circle-outline', description: 'WhatsApp iletişim numarası', isPublic: true },
+    { key: 'business_hours_weekdays', label: 'Hafta İçi Çalışma Saatleri', valueType: 'text', category: 'contact', placeholder: '09:00 - 18:00', icon: 'clock-outline', description: 'Pazartesi-Cuma çalışma saatleri', isPublic: true },
+    { key: 'business_hours_weekend', label: 'Hafta Sonu Çalışma Saatleri', valueType: 'text', category: 'contact', placeholder: '10:00 - 16:00', icon: 'clock-outline', description: 'Cumartesi-Pazar çalışma saatleri', isPublic: true },
   ];
 
   // Şirket Bilgileri

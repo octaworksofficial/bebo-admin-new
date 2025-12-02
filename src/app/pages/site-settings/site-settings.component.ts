@@ -1,5 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { SettingsService, AboutContent, SiteSettings, LegalDocument } from '../../@core/services/settings.service';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { NbToastrService } from '@nebular/theme';
+import { SettingsService, SiteSetting } from '../../@core/services/settings.service';
+
+interface SettingField {
+  key: string;
+  label: string;
+  valueType: 'text' | 'email' | 'phone' | 'url' | 'textarea';
+  category: 'contact' | 'company' | 'social' | 'general';
+  placeholder?: string;
+  icon?: string;
+  description?: string;
+  isPublic?: boolean;
+}
 
 @Component({
   selector: 'ngx-site-settings',
@@ -7,301 +20,263 @@ import { SettingsService, AboutContent, SiteSettings, LegalDocument } from '../.
   styleUrls: ['./site-settings.component.scss'],
 })
 export class SiteSettingsComponent implements OnInit {
-  // About Content - Her dil için ayrı satır
-  aboutContents: { [key: string]: AboutContent } = {};
-  
-  // Site Settings - İletişim ve sosyal medya
-  siteSettings: SiteSettings = {};
-  
-  // Legal Documents
-  legalDocuments: LegalDocument[] = [];
-  selectedDocument: LegalDocument | null = null;
-  editingDocument: LegalDocument | null = null;
-  
   loading = true;
   saving = false;
-  saved = false;
-  error: string = null;
-
-  // Dil seçimi
-  activeLanguage: 'tr' | 'en' | 'fr' = 'tr';
   
-  // Ana sekme
-  activeMainTab: 'about' | 'contact' | 'legal' = 'about';
+  contactForm: FormGroup;
+  companyForm: FormGroup;
+  socialForm: FormGroup;
+  generalForm: FormGroup;
   
-  // About alt sekmesi
-  activeSection: 1 | 2 | 3 | 'mission' = 1;
-
-  languages = [
-    { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  // İletişim Bilgileri
+  contactFields: SettingField[] = [
+    { key: 'contact_email', label: 'İletişim E-posta', valueType: 'email', category: 'contact', placeholder: 'info@birebiro.com', icon: 'email-outline', description: 'Genel iletişim e-posta adresi', isPublic: true },
+    { key: 'support_email', label: 'Destek E-posta', valueType: 'email', category: 'contact', placeholder: 'destek@birebiro.com', icon: 'email-outline', description: 'Müşteri destek e-posta adresi', isPublic: true },
+    { key: 'contact_phone', label: 'Telefon', valueType: 'phone', category: 'contact', placeholder: '+90 555 123 45 67', icon: 'phone-outline', description: 'İletişim telefon numarası', isPublic: true },
+    { key: 'whatsapp_number', label: 'WhatsApp', valueType: 'phone', category: 'contact', placeholder: '+90 555 123 45 67', icon: 'message-circle-outline', description: 'WhatsApp iletişim numarası', isPublic: true },
+    { key: 'business_hours_weekdays', label: 'Hafta İçi Çalışma Saatleri', valueType: 'text', category: 'contact', placeholder: '09:00 - 18:00', icon: 'clock-outline', description: 'Pazartesi-Cuma çalışma saatleri', isPublic: true },
+    { key: 'business_hours_weekend', label: 'Hafta Sonu Çalışma Saatleri', valueType: 'text', category: 'contact', placeholder: '10:00 - 16:00', icon: 'clock-outline', description: 'Cumartesi-Pazar çalışma saatleri', isPublic: true },
   ];
 
-  // Yaygın yasal döküman türleri
-  documentTypes = [
-    { slug: 'privacy-policy', label: 'Gizlilik Politikası' },
-    { slug: 'terms-of-service', label: 'Kullanım Koşulları' },
-    { slug: 'kvkk', label: 'KVKK Aydınlatma Metni' },
-    { slug: 'cookie-policy', label: 'Çerez Politikası' },
-    { slug: 'refund-policy', label: 'İade Politikası' },
+  // Şirket Bilgileri
+  companyFields: SettingField[] = [
+    { key: 'company_name', label: 'Şirket Adı', valueType: 'text', category: 'company', placeholder: 'Birebiro', icon: 'briefcase-outline', description: 'Marka adı', isPublic: true },
+    { key: 'company_legal_name', label: 'Şirket Ünvanı', valueType: 'text', category: 'company', placeholder: 'Birebiro Teknoloji A.Ş.', icon: 'file-text-outline', description: 'Resmi şirket ünvanı', isPublic: true },
+    { key: 'company_address', label: 'Adres', valueType: 'textarea', category: 'company', placeholder: 'Maslak Mahallesi, Büyükdere Caddesi No: 123...', icon: 'pin-outline', description: 'Şirket adresi', isPublic: true },
+    { key: 'company_tax_office', label: 'Vergi Dairesi', valueType: 'text', category: 'company', placeholder: 'Maslak Vergi Dairesi', icon: 'home-outline', description: 'Vergi dairesi adı', isPublic: false },
+    { key: 'company_tax_number', label: 'Vergi No', valueType: 'text', category: 'company', placeholder: '1234567890', icon: 'hash-outline', description: 'Vergi kimlik numarası', isPublic: false },
   ];
 
-  constructor(private settingsService: SettingsService) {}
+  // Sosyal Medya
+  socialFields: SettingField[] = [
+    { key: 'social_instagram', label: 'Instagram', valueType: 'url', category: 'social', placeholder: 'https://instagram.com/birebiro', icon: 'camera-outline', isPublic: true },
+    { key: 'social_twitter', label: 'Twitter/X', valueType: 'url', category: 'social', placeholder: 'https://twitter.com/birebiro', icon: 'twitter-outline', isPublic: true },
+    { key: 'social_facebook', label: 'Facebook', valueType: 'url', category: 'social', placeholder: 'https://facebook.com/birebiro', icon: 'facebook-outline', isPublic: true },
+    { key: 'social_linkedin', label: 'LinkedIn', valueType: 'url', category: 'social', placeholder: 'https://linkedin.com/company/birebiro', icon: 'linkedin-outline', isPublic: true },
+    { key: 'social_youtube', label: 'YouTube', valueType: 'url', category: 'social', placeholder: 'https://youtube.com/@birebiro', icon: 'play-circle-outline', isPublic: true },
+    { key: 'social_tiktok', label: 'TikTok', valueType: 'url', category: 'social', placeholder: 'https://tiktok.com/@birebiro', icon: 'video-outline', isPublic: true },
+  ];
+
+  // Genel Ayarlar
+  generalFields: SettingField[] = [
+    { key: 'site_name', label: 'Site Adı', valueType: 'text', category: 'general', placeholder: 'Birebiro', icon: 'globe-outline', description: 'Web sitesi başlığı', isPublic: true },
+    { key: 'site_description', label: 'Site Açıklaması', valueType: 'textarea', category: 'general', placeholder: 'Yapay zeka destekli kişisel sanat eserleri', icon: 'file-text-outline', description: 'SEO açıklaması', isPublic: true },
+    { key: 'copyright_text', label: 'Copyright', valueType: 'text', category: 'general', placeholder: '© 2025 Birebiro. Tüm hakları saklıdır.', icon: 'shield-outline', description: 'Footer copyright metni', isPublic: true },
+  ];
+
+  constructor(
+    private fb: FormBuilder,
+    private settingsService: SettingsService,
+    private toastrService: NbToastrService,
+  ) {
+    this.initForms();
+  }
 
   ngOnInit(): void {
-    this.loadData();
+    this.loadSettings();
   }
 
-  loadData(): void {
+  initForms(): void {
+    // Contact form
+    const contactControls: { [key: string]: string } = {};
+    this.contactFields.forEach(field => {
+      contactControls[field.key] = '';
+    });
+    this.contactForm = this.fb.group(contactControls);
+
+    // Company form
+    const companyControls: { [key: string]: string } = {};
+    this.companyFields.forEach(field => {
+      companyControls[field.key] = '';
+    });
+    this.companyForm = this.fb.group(companyControls);
+
+    // Social form
+    const socialControls: { [key: string]: string } = {};
+    this.socialFields.forEach(field => {
+      socialControls[field.key] = '';
+    });
+    this.socialForm = this.fb.group(socialControls);
+
+    // General form
+    const generalControls: { [key: string]: string } = {};
+    this.generalFields.forEach(field => {
+      generalControls[field.key] = '';
+    });
+    this.generalForm = this.fb.group(generalControls);
+  }
+
+  loadSettings(): void {
     this.loading = true;
-    this.error = null;
-    
-    // About content yükle
-    this.settingsService.getAllAboutContent().subscribe({
-      next: (contents) => {
-        contents.forEach(content => {
-          this.aboutContents[content.language] = content;
-        });
-        
-        // Site settings yükle
-        this.settingsService.getSiteSettings().subscribe({
-          next: (settings) => {
-            this.siteSettings = settings;
-            
-            // Legal documents yükle
-            this.loadLegalDocuments();
-          },
-          error: (err) => {
-            console.error('Site settings load error:', err);
-            this.loading = false;
+    this.settingsService.getAllSiteSettings().subscribe({
+      next: (settings) => {
+        settings.forEach(setting => {
+          if (this.contactForm.get(setting.key)) {
+            this.contactForm.patchValue({ [setting.key]: setting.value || '' });
+          }
+          if (this.companyForm.get(setting.key)) {
+            this.companyForm.patchValue({ [setting.key]: setting.value || '' });
+          }
+          if (this.socialForm.get(setting.key)) {
+            this.socialForm.patchValue({ [setting.key]: setting.value || '' });
+          }
+          if (this.generalForm.get(setting.key)) {
+            this.generalForm.patchValue({ [setting.key]: setting.value || '' });
           }
         });
-      },
-      error: (err) => {
-        console.error('About content load error:', err);
-        this.error = 'İçerik yüklenirken hata oluştu.';
         this.loading = false;
-      }
-    });
-  }
-
-  loadLegalDocuments(): void {
-    this.settingsService.getAllLegalDocuments(this.activeLanguage).subscribe({
-      next: (documents) => {
-        this.legalDocuments = documents;
+      },
+      error: (error) => {
+        console.error('Settings load error:', error);
+        this.toastrService.danger('Ayarlar yüklenirken hata oluştu', 'Hata');
         this.loading = false;
-        
-        // Önceden seçili döküman varsa güncelle
-        if (this.selectedDocument) {
-          const updated = documents.find(d => d.id === this.selectedDocument.id);
-          if (updated) {
-            this.selectedDocument = updated;
-          }
-        }
       },
-      error: (err) => {
-        console.error('Legal documents load error:', err);
-        this.loading = false;
-      }
     });
   }
 
-  get currentContent(): AboutContent {
-    return this.aboutContents[this.activeLanguage] || this.getEmptyContent(this.activeLanguage);
-  }
-
-  getEmptyContent(language: string): AboutContent {
-    return {
-      language,
-      title1: '', body1: '',
-      title2: '', body2: '',
-      title3: '', body3: '',
-      mission: '', vision: '',
-    };
-  }
-
-  saveAboutContent(): void {
+  saveContactSettings(): void {
     this.saving = true;
-    this.saved = false;
-    this.error = null;
+    const settings: SiteSetting[] = this.contactFields.map(field => ({
+      key: field.key,
+      value: this.contactForm.get(field.key)?.value || '',
+      valueType: field.valueType,
+      category: field.category,
+      label: field.label,
+      isPublic: field.isPublic ?? true,
+    }));
 
-    const contents = Object.values(this.aboutContents);
-    
-    this.settingsService.updateAllAboutContent(contents).subscribe({
+    this.settingsService.bulkUpdateSiteSettings(settings).subscribe({
       next: () => {
+        this.toastrService.success('İletişim ayarları kaydedildi', 'Başarılı');
         this.saving = false;
-        this.saved = true;
-        setTimeout(() => this.saved = false, 3000);
       },
-      error: (err) => {
-        console.error('About content save error:', err);
-        this.error = 'İçerik kaydedilirken hata oluştu.';
+      error: (error) => {
+        console.error('Save error:', error);
+        this.toastrService.danger('Kayıt sırasında hata oluştu', 'Hata');
         this.saving = false;
-      }
+      },
     });
   }
 
-  saveSiteSettings(): void {
+  saveCompanySettings(): void {
     this.saving = true;
-    this.saved = false;
-    this.error = null;
+    const settings: SiteSetting[] = this.companyFields.map(field => ({
+      key: field.key,
+      value: this.companyForm.get(field.key)?.value || '',
+      valueType: field.valueType,
+      category: field.category,
+      label: field.label,
+      isPublic: field.isPublic ?? true,
+    }));
 
-    this.settingsService.updateSiteSettings(this.siteSettings).subscribe({
+    this.settingsService.bulkUpdateSiteSettings(settings).subscribe({
       next: () => {
+        this.toastrService.success('Şirket bilgileri kaydedildi', 'Başarılı');
         this.saving = false;
-        this.saved = true;
-        setTimeout(() => this.saved = false, 3000);
       },
-      error: (err) => {
-        console.error('Site settings save error:', err);
-        this.error = 'Ayarlar kaydedilirken hata oluştu.';
+      error: (error) => {
+        console.error('Save error:', error);
+        this.toastrService.danger('Kayıt sırasında hata oluştu', 'Hata');
         this.saving = false;
-      }
+      },
     });
   }
 
-  setLanguage(lang: 'tr' | 'en' | 'fr'): void {
-    this.activeLanguage = lang;
-    // Legal sekmesindeyse dökümanları yeniden yükle
-    if (this.activeMainTab === 'legal') {
-      this.loadLegalDocuments();
-    }
-  }
-
-  setMainTab(tab: 'about' | 'contact' | 'legal'): void {
-    this.activeMainTab = tab;
-    if (tab === 'legal') {
-      this.loadLegalDocuments();
-    }
-  }
-
-  setSection(section: 1 | 2 | 3 | 'mission'): void {
-    this.activeSection = section;
-  }
-
-  updateContent(field: string, value: string): void {
-    if (!this.aboutContents[this.activeLanguage]) {
-      this.aboutContents[this.activeLanguage] = this.getEmptyContent(this.activeLanguage);
-    }
-    (this.aboutContents[this.activeLanguage] as any)[field] = value;
-  }
-
-  // ==================== Legal Documents Methods ====================
-  
-  getDocumentTypeLabel(slug: string): string {
-    const type = this.documentTypes.find(t => t.slug === slug);
-    return type ? type.label : slug;
-  }
-
-  selectDocument(doc: LegalDocument): void {
-    this.selectedDocument = doc;
-    this.editingDocument = { ...doc }; // Kopyasını al
-  }
-
-  cancelEdit(): void {
-    this.selectedDocument = null;
-    this.editingDocument = null;
-  }
-
-  saveLegalDocument(): void {
-    if (!this.editingDocument || !this.editingDocument.id) return;
-    
+  saveSocialSettings(): void {
     this.saving = true;
-    this.saved = false;
-    this.error = null;
+    const settings: SiteSetting[] = this.socialFields.map(field => ({
+      key: field.key,
+      value: this.socialForm.get(field.key)?.value || '',
+      valueType: field.valueType,
+      category: field.category,
+      label: field.label,
+      isPublic: field.isPublic ?? true,
+    }));
 
-    this.settingsService.updateLegalDocument(this.editingDocument.id, {
-      title: this.editingDocument.title,
-      content: this.editingDocument.content,
-      isActive: this.editingDocument.isActive,
-      sortOrder: this.editingDocument.sortOrder,
-    }).subscribe({
-      next: (updated) => {
-        this.saving = false;
-        this.saved = true;
-        this.selectedDocument = updated;
-        this.editingDocument = { ...updated };
-        this.loadLegalDocuments();
-        setTimeout(() => this.saved = false, 3000);
-      },
-      error: (err) => {
-        console.error('Legal document save error:', err);
-        this.error = 'Döküman kaydedilirken hata oluştu.';
-        this.saving = false;
-      }
-    });
-  }
-
-  toggleDocumentStatus(doc: LegalDocument): void {
-    this.settingsService.updateLegalDocument(doc.id, {
-      isActive: !doc.isActive,
-    }).subscribe({
+    this.settingsService.bulkUpdateSiteSettings(settings).subscribe({
       next: () => {
-        doc.isActive = !doc.isActive;
+        this.toastrService.success('Sosyal medya ayarları kaydedildi', 'Başarılı');
+        this.saving = false;
       },
-      error: (err) => {
-        console.error('Status toggle error:', err);
-      }
+      error: (error) => {
+        console.error('Save error:', error);
+        this.toastrService.danger('Kayıt sırasında hata oluştu', 'Hata');
+        this.saving = false;
+      },
     });
   }
 
-  createNewDocument(): void {
-    this.editingDocument = {
-      slug: '',
-      title: '',
-      content: '',
-      language: this.activeLanguage,
-      isActive: true,
-      sortOrder: this.legalDocuments.length,
-    };
-    this.selectedDocument = null;
-  }
-
-  saveNewDocument(): void {
-    if (!this.editingDocument || !this.editingDocument.slug || !this.editingDocument.title) {
-      this.error = 'Lütfen tüm zorunlu alanları doldurun.';
-      return;
-    }
-    
+  saveGeneralSettings(): void {
     this.saving = true;
-    this.saved = false;
-    this.error = null;
+    const settings: SiteSetting[] = this.generalFields.map(field => ({
+      key: field.key,
+      value: this.generalForm.get(field.key)?.value || '',
+      valueType: field.valueType,
+      category: field.category,
+      label: field.label,
+      isPublic: field.isPublic ?? true,
+    }));
 
-    this.settingsService.createLegalDocument(this.editingDocument).subscribe({
-      next: (created) => {
+    this.settingsService.bulkUpdateSiteSettings(settings).subscribe({
+      next: () => {
+        this.toastrService.success('Genel ayarlar kaydedildi', 'Başarılı');
         this.saving = false;
-        this.saved = true;
-        this.selectedDocument = created;
-        this.editingDocument = { ...created };
-        this.loadLegalDocuments();
-        setTimeout(() => this.saved = false, 3000);
       },
-      error: (err) => {
-        console.error('Legal document create error:', err);
-        this.error = 'Döküman oluşturulurken hata oluştu.';
+      error: (error) => {
+        console.error('Save error:', error);
+        this.toastrService.danger('Kayıt sırasında hata oluştu', 'Hata');
         this.saving = false;
-      }
+      },
     });
   }
 
-  deleteDocument(doc: LegalDocument): void {
-    if (!confirm(`"${doc.title}" dökümanını silmek istediğinize emin misiniz?`)) {
-      return;
-    }
+  saveAllSettings(): void {
+    this.saving = true;
+    const allSettings: SiteSetting[] = [
+      ...this.contactFields.map(field => ({
+        key: field.key,
+        value: this.contactForm.get(field.key)?.value || '',
+        valueType: field.valueType,
+        category: field.category,
+        label: field.label,
+        isPublic: field.isPublic ?? true,
+      })),
+      ...this.companyFields.map(field => ({
+        key: field.key,
+        value: this.companyForm.get(field.key)?.value || '',
+        valueType: field.valueType,
+        category: field.category,
+        label: field.label,
+        isPublic: field.isPublic ?? true,
+      })),
+      ...this.socialFields.map(field => ({
+        key: field.key,
+        value: this.socialForm.get(field.key)?.value || '',
+        valueType: field.valueType,
+        category: field.category,
+        label: field.label,
+        isPublic: field.isPublic ?? true,
+      })),
+      ...this.generalFields.map(field => ({
+        key: field.key,
+        value: this.generalForm.get(field.key)?.value || '',
+        valueType: field.valueType,
+        category: field.category,
+        label: field.label,
+        isPublic: field.isPublic ?? true,
+      })),
+    ];
 
-    this.settingsService.deleteLegalDocument(doc.id).subscribe({
+    this.settingsService.bulkUpdateSiteSettings(allSettings).subscribe({
       next: () => {
-        if (this.selectedDocument?.id === doc.id) {
-          this.selectedDocument = null;
-          this.editingDocument = null;
-        }
-        this.loadLegalDocuments();
+        this.toastrService.success('Tüm ayarlar kaydedildi', 'Başarılı');
+        this.saving = false;
       },
-      error: (err) => {
-        console.error('Delete error:', err);
-        this.error = 'Döküman silinirken hata oluştu.';
-      }
+      error: (error) => {
+        console.error('Save error:', error);
+        this.toastrService.danger('Kayıt sırasında hata oluştu', 'Hata');
+        this.saving = false;
+      },
     });
   }
 }
