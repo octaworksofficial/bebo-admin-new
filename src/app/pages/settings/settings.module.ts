@@ -9,19 +9,16 @@ import {
   NbToggleModule, 
   NbIconModule,
   NbSpinnerModule,
-  NbTabsetModule,
 } from '@nebular/theme';
 
 import { SettingsRoutingModule } from './settings-routing.module';
 import { SettingsComponent } from './settings.component';
 import { CreditSettingsComponent } from './credit-settings/credit-settings.component';
-import { SiteSettingsComponent } from './site-settings/site-settings.component';
 
 @NgModule({
   declarations: [
     SettingsComponent,
     CreditSettingsComponent,
-    SiteSettingsComponent,
   ],
   imports: [
     CommonModule,
@@ -35,7 +32,6 @@ import { SiteSettingsComponent } from './site-settings/site-settings.component';
     NbToggleModule,
     NbIconModule,
     NbSpinnerModule,
-    NbTabsetModule,
   ],
 })
 export class SettingsModule { }
