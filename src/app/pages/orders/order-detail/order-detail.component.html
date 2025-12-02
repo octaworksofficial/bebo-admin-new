@@ -112,7 +112,24 @@
               </button>
             </div>
             <div class="product-content">
-              <img *ngIf="order.generatedImageUrl" [src]="order.generatedImageUrl" class="product-img" alt="Ürün" (click)="downloadGeneratedImage()">
+              <div class="product-img-container">
+                <!-- Image Skeleton Loader -->
+                <div *ngIf="imageLoading && order.generatedImageUrl" class="image-skeleton">
+                  <div class="skeleton-shimmer"></div>
+                  <div class="skeleton-icon">
+                    <nb-icon icon="image-outline"></nb-icon>
+                  </div>
+                </div>
+                <!-- Actual Image -->
+                <img *ngIf="order.generatedImageUrl" 
+                     [src]="order.generatedImageUrl" 
+                     class="product-img" 
+                     [class.image-loaded]="!imageLoading"
+                     alt="Ürün" 
+                     (click)="downloadGeneratedImage()"
+                     (load)="imageLoading = false"
+                     (error)="imageLoading = false">
+              </div>
               <div class="product-details">
                 <div class="product-name">{{ order.productName }}</div>
                 <div class="prompt" *ngIf="order.imagePrompt">"{{ order.imagePrompt }}"</div>

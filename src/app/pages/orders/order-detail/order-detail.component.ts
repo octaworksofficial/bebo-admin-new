@@ -15,6 +15,7 @@ export class OrderDetailComponent implements OnInit {
   saving = false;
   error: string = null;
   hasChanges = false; // Güncelleme yapıldı mı?
+  imageLoading = true; // Görsel yükleniyor mu?
 
   // Form models
   trackingNumber: string = '';
