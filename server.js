@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const path = require('path');
+const compression = require('compression');
 require('dotenv').config();
 
 const app = express();
@@ -2440,7 +2442,23 @@ app.get('/api/site-settings/public', async (req, res) => {
   }
 });
 
-// 404 handler
+// Compression middleware
+app.use(compression());
+
+// Angular static dosyalarını serve et
+const distPath = path.join(__dirname, 'dist');
+app.use(express.static(distPath));
+
+// Angular routing için - API olmayan tüm istekleri index.html'e yönlendir
+app.get('*', (req, res, next) => {
+  // API isteklerini atla
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
+// 404 handler - sadece API istekleri için
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
