@@ -744,7 +744,7 @@ app.post('/api/orders/:id/refund', async (req, res) => {
       merchant_oid: order.merchantOid,
       return_amount: returnAmountTL,
       paytr_token: paytrToken,
-      reference_no: `REFUND_${id}_${Date.now()}`
+      reference_no: `REFUND${id}T${Date.now()}`
     });
     
     const options = {
