@@ -1,13 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
-const path = require('path');
-const compression = require('compression');
-const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
 // PostgreSQL connection pool
 const connectionString = 'postgresql://postgres:ptrzmLFbwlrQYpPJfeAofGqMkXFdSIhu@crossover.proxy.rlwy.net:37534/railway';
@@ -33,6 +30,15 @@ app.use(express.json());
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
+});
+
+// VERSION CHECK - Bu endpoint Railway'in hangi kodu çalıştırdığını gösterir
+app.get('/api/version', (req, res) => {
+  res.json({ 
+    version: '2.2.0-debug',
+    deployTime: '2025-12-03T00:00:00Z',
+    features: ['site-settings', 'refund', 'dashboard']
+  });
 });
 
 // ==================== PRODUCTS API ====================
@@ -166,6 +172,8 @@ app.get('/api/products/:id', async (req, res) => {
         color_code as "colorCode",
         frame_image as "frameImage",
         frame_image_large as "frameImageLarge",
+        mockup_template as "mockupTemplate",
+        mockup_config as "mockupConfig",
         sort_order as "sortOrder",
         created_at as "createdAt",
         updated_at as "updatedAt"
@@ -401,6 +409,8 @@ app.get('/api/products/:productId/frames', async (req, res) => {
         color_code as "colorCode",
         frame_image as "frameImage",
         frame_image_large as "frameImageLarge",
+        mockup_template as "mockupTemplate",
+        mockup_config as "mockupConfig",
         sort_order as "sortOrder",
         created_at as "createdAt",
         updated_at as "updatedAt"
@@ -419,13 +429,13 @@ app.get('/api/products/:productId/frames', async (req, res) => {
 app.post('/api/products/:productId/frames', async (req, res) => {
   try {
     const { productId } = req.params;
-    const { slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, sortOrder } = req.body;
+    const { slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, mockupTemplate, mockupConfig, sortOrder } = req.body;
     
     const result = await pool.query(`
-      INSERT INTO product_frame (product_id, slug, name, name_en, name_fr, price_amount, color_code, frame_image, frame_image_large, sort_order)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO product_frame (product_id, slug, name, name_en, name_fr, price_amount, color_code, frame_image, frame_image_large, mockup_template, mockup_config, sort_order)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING id
-    `, [productId, slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, sortOrder || 0]);
+    `, [productId, slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, mockupTemplate, mockupConfig, sortOrder || 0]);
     
     res.status(201).json({ id: result.rows[0].id, message: 'Frame created successfully' });
   } catch (error) {
@@ -438,7 +448,7 @@ app.post('/api/products/:productId/frames', async (req, res) => {
 app.put('/api/products/:productId/frames/:frameId', async (req, res) => {
   try {
     const { productId, frameId } = req.params;
-    const { slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, sortOrder } = req.body;
+    const { slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, mockupTemplate, mockupConfig, sortOrder } = req.body;
     
     const result = await pool.query(`
       UPDATE product_frame SET
@@ -450,11 +460,13 @@ app.put('/api/products/:productId/frames/:frameId', async (req, res) => {
         color_code = $6,
         frame_image = $7,
         frame_image_large = $8,
-        sort_order = COALESCE($9, sort_order),
+        mockup_template = $9,
+        mockup_config = $10,
+        sort_order = COALESCE($11, sort_order),
         updated_at = NOW()
-      WHERE id = $10 AND product_id = $11
+      WHERE id = $12 AND product_id = $13
       RETURNING id
-    `, [slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, sortOrder, frameId, productId]);
+    `, [slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, mockupTemplate, mockupConfig, sortOrder, frameId, productId]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Frame not found' });
@@ -504,7 +516,6 @@ app.get('/api/orders', async (req, res) => {
         o.customer_district as "customerDistrict",
         o.payment_amount as "paymentAmount",
         o.total_amount as "totalAmount",
-        o.credit_amount as "creditAmount",
         o.payment_status as "paymentStatus",
         o.shipping_status as "shippingStatus",
         o.tracking_number as "trackingNumber",
@@ -537,7 +548,6 @@ app.get('/api/orders/:id', async (req, res) => {
         o.merchant_oid as "merchantOid",
         o.payment_amount as "paymentAmount",
         o.total_amount as "totalAmount",
-        o.credit_amount as "creditAmount",
         o.currency,
         o.payment_status as "paymentStatus",
         o.payment_type as "paymentType",
@@ -658,6 +668,152 @@ app.patch('/api/orders/:id/notes', async (req, res) => {
   } catch (error) {
     console.error('Order notes update error:', error);
     res.status(500).json({ error: 'Failed to update order notes' });
+  }
+});
+
+// ==================== PAYTR REFUND API ====================
+const crypto = require('crypto');
+const https = require('https');
+const querystring = require('querystring');
+
+// PayTR İade işlemi
+app.post('/api/orders/:id/refund', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount, reason } = req.body; // amount: iade tutarı (kuruş cinsinden), reason: iade nedeni
+    
+    // Sipariş bilgisini al
+    const orderResult = await pool.query(`
+      SELECT 
+        id,
+        merchant_oid as "merchantOid",
+        payment_amount as "paymentAmount",
+        total_amount as "totalAmount",
+        payment_status as "paymentStatus",
+        currency
+      FROM "order" 
+      WHERE id = $1
+    `, [id]);
+    
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Sipariş bulunamadı' });
+    }
+    
+    const order = orderResult.rows[0];
+    
+    // Sadece başarılı ödemelerde iade yapılabilir
+    if (order.paymentStatus !== 'success') {
+      return res.status(400).json({ error: 'Sadece başarılı ödemelerde iade yapılabilir' });
+    }
+    
+    // İade tutarını belirle (tam iade veya kısmi iade)
+    const orderTotal = order.totalAmount || order.paymentAmount;
+    const refundAmount = amount ? parseFloat(amount) : orderTotal;
+    
+    // İade tutarı sipariş tutarından fazla olamaz
+    if (refundAmount > orderTotal) {
+      return res.status(400).json({ error: 'İade tutarı sipariş tutarından fazla olamaz' });
+    }
+    
+    // PayTR API bilgileri
+    const merchantId = process.env.PAYTR_MERCHANT_ID;
+    const merchantKey = process.env.PAYTR_MERCHANT_KEY;
+    const merchantSalt = process.env.PAYTR_MERCHANT_SALT;
+    
+    if (!merchantId || !merchantKey || !merchantSalt) {
+      console.error('PayTR credentials missing');
+      return res.status(500).json({ error: 'PayTR yapılandırması eksik' });
+    }
+    
+    // İade tutarını TL formatına çevir (kuruştan TL'ye, 2 ondalık)
+    const returnAmountTL = (refundAmount / 100).toFixed(2);
+    
+    // PayTR token oluştur
+    // Token: base64(hmac_sha256(merchant_id + merchant_oid + return_amount + merchant_salt, merchant_key))
+    const hashStr = merchantId + order.merchantOid + returnAmountTL + merchantSalt;
+    const paytrToken = crypto
+      .createHmac('sha256', merchantKey)
+      .update(hashStr)
+      .digest('base64');
+    
+    // PayTR'a iade isteği gönder
+    const postData = querystring.stringify({
+      merchant_id: merchantId,
+      merchant_oid: order.merchantOid,
+      return_amount: returnAmountTL,
+      paytr_token: paytrToken,
+      reference_no: `REFUND_${id}_${Date.now()}`
+    });
+    
+    const options = {
+      hostname: 'www.paytr.com',
+      port: 443,
+      path: '/odeme/iade',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+    
+    // PayTR'a istek at
+    const paytrResponse = await new Promise((resolve, reject) => {
+      const req = https.request(options, (response) => {
+        let data = '';
+        response.on('data', chunk => data += chunk);
+        response.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(new Error('PayTR yanıtı parse edilemedi: ' + data));
+          }
+        });
+      });
+      
+      req.on('error', (e) => reject(e));
+      req.setTimeout(90000, () => {
+        req.destroy();
+        reject(new Error('PayTR isteği zaman aşımına uğradı'));
+      });
+      
+      req.write(postData);
+      req.end();
+    });
+    
+    console.log('PayTR Refund Response:', paytrResponse);
+    
+    // PayTR yanıtını kontrol et
+    if (paytrResponse.status === 'success') {
+      // Veritabanında siparişi güncelle
+      await pool.query(`
+        UPDATE "order" 
+        SET 
+          payment_status = 'refunded',
+          notes = COALESCE(notes, '') || E'\n\n[İADE] ' || $1 || ' - Tutar: ' || $2 || ' TL - Tarih: ' || NOW()::text,
+          updated_at = NOW()
+        WHERE id = $3
+      `, [reason || 'İade yapıldı', returnAmountTL, id]);
+      
+      res.json({
+        success: true,
+        message: 'İade işlemi başarılı',
+        refundAmount: returnAmountTL,
+        merchantOid: order.merchantOid,
+        isTest: paytrResponse.is_test === 1
+      });
+    } else {
+      // PayTR hatası
+      console.error('PayTR refund error:', paytrResponse);
+      res.status(400).json({
+        success: false,
+        error: paytrResponse.err_msg || 'İade işlemi başarısız',
+        errorCode: paytrResponse.err_no
+      });
+    }
+    
+  } catch (error) {
+    console.error('Refund error:', error);
+    res.status(500).json({ error: 'İade işlemi sırasında hata oluştu: ' + error.message });
   }
 });
 
@@ -1536,7 +1692,16 @@ app.get('/api/art-credit-settings', async (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Birebiro Admin API is running' });
+  res.json({ 
+    status: 'ok', 
+    message: 'Birebiro Admin API is running',
+    version: '2.1.0',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      siteSettings: true,
+      refund: true
+    }
+  });
 });
 
 // 404 handler
@@ -2064,19 +2229,17 @@ app.get('/api/dashboard/orders-by-status', async (req, res) => {
 app.get('/api/dashboard/top-products', async (req, res) => {
   try {
     const days = parseInt(req.query.days) || null;
-    const dateFilter = getDateFilter(days, 'o.created_at');
+    const dateFilter = days ? `AND o.created_at >= NOW() - INTERVAL '${days} days'` : '';
     
     const result = await pool.query(`
       SELECT 
         p.id,
         p.name,
         p.image_square_url as "imageUrl",
-        COUNT(oi.id) as "orderCount",
-        COALESCE(SUM(CAST(oi.price AS DECIMAL)), 0) as "totalRevenue"
+        COUNT(o.id) as "orderCount",
+        COALESCE(SUM(CAST(o.total_amount AS DECIMAL)), 0) as "totalRevenue"
       FROM product p
-      LEFT JOIN order_item oi ON p.id = oi.product_id
-      LEFT JOIN "order" o ON oi.order_id = o.id
-      ${dateFilter ? `WHERE ${dateFilter}` : ''}
+      LEFT JOIN "order" o ON p.id = o.product_id ${dateFilter}
       GROUP BY p.id, p.name, p.image_square_url
       ORDER BY "orderCount" DESC
       LIMIT 5
@@ -2088,39 +2251,198 @@ app.get('/api/dashboard/top-products', async (req, res) => {
   }
 });
 
-// ==================== STATIC FILE SERVING ====================
+// ==================== SITE SETTINGS ====================
 
-// Gzip compression for static files
-app.use(compression());
-
-const distPath = path.join(__dirname, 'dist');
-console.log('Dist path:', distPath);
-console.log('Dist exists:', fs.existsSync(distPath));
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
+// Get all site settings
+app.get('/api/site-settings', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        id,
+        key,
+        value,
+        value_type as "valueType",
+        category,
+        label,
+        description,
+        is_public as "isPublic",
+        updated_at as "updatedAt"
+      FROM site_settings
+      ORDER BY category, key
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Site settings fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch site settings' });
+  }
 });
 
-// Serve static files from dist folder
-app.use(express.static(distPath, {
-  maxAge: '1y',
-  etag: false
-}));
+// Get site settings by category
+app.get('/api/site-settings/category/:category', async (req, res) => {
+  try {
+    const { category } = req.params;
+    const result = await pool.query(`
+      SELECT 
+        id,
+        key,
+        value,
+        value_type as "valueType",
+        category,
+        label,
+        description,
+        is_public as "isPublic",
+        updated_at as "updatedAt"
+      FROM site_settings
+      WHERE category = $1
+      ORDER BY key
+    `, [category]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Site settings by category error:', error);
+    res.status(500).json({ error: 'Failed to fetch site settings' });
+  }
+});
 
-// Handle Angular routing - send all non-API requests to index.html
+// Get single site setting by key
+app.get('/api/site-settings/key/:key', async (req, res) => {
+  try {
+    const { key } = req.params;
+    const result = await pool.query(`
+      SELECT 
+        id,
+        key,
+        value,
+        value_type as "valueType",
+        category,
+        label,
+        description,
+        is_public as "isPublic",
+        updated_at as "updatedAt"
+      FROM site_settings
+      WHERE key = $1
+    `, [key]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Setting not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Site setting fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch site setting' });
+  }
+});
+
+// Create or update site setting (upsert)
+app.put('/api/site-settings/:key', async (req, res) => {
+  try {
+    const { key } = req.params;
+    const { value, valueType, category, label, description, isPublic } = req.body;
+    
+    const result = await pool.query(`
+      INSERT INTO site_settings (key, value, value_type, category, label, description, is_public, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      ON CONFLICT (key) DO UPDATE SET
+        value = EXCLUDED.value,
+        value_type = COALESCE(EXCLUDED.value_type, site_settings.value_type),
+        category = COALESCE(EXCLUDED.category, site_settings.category),
+        label = COALESCE(EXCLUDED.label, site_settings.label),
+        description = COALESCE(EXCLUDED.description, site_settings.description),
+        is_public = COALESCE(EXCLUDED.is_public, site_settings.is_public),
+        updated_at = NOW()
+      RETURNING id
+    `, [key, value, valueType || 'text', category || 'general', label, description, isPublic !== false]);
+    
+    res.json({ success: true, id: result.rows[0].id, message: 'Setting saved successfully' });
+  } catch (error) {
+    console.error('Site setting upsert error:', error);
+    res.status(500).json({ error: 'Failed to save site setting' });
+  }
+});
+
+// Bulk update site settings
+app.put('/api/site-settings', async (req, res) => {
+  try {
+    const settings = req.body;
+    
+    if (!Array.isArray(settings)) {
+      return res.status(400).json({ error: 'Expected array of settings' });
+    }
+    
+    for (const setting of settings) {
+      await pool.query(`
+        INSERT INTO site_settings (key, value, value_type, category, label, description, is_public, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+        ON CONFLICT (key) DO UPDATE SET
+          value = EXCLUDED.value,
+          value_type = COALESCE(EXCLUDED.value_type, site_settings.value_type),
+          category = COALESCE(EXCLUDED.category, site_settings.category),
+          label = COALESCE(EXCLUDED.label, site_settings.label),
+          description = COALESCE(EXCLUDED.description, site_settings.description),
+          is_public = COALESCE(EXCLUDED.is_public, site_settings.is_public),
+          updated_at = NOW()
+      `, [
+        setting.key,
+        setting.value,
+        setting.valueType || 'text',
+        setting.category || 'general',
+        setting.label,
+        setting.description,
+        setting.isPublic !== false
+      ]);
+    }
+    
+    res.json({ success: true, message: 'Settings saved successfully' });
+  } catch (error) {
+    console.error('Site settings bulk update error:', error);
+    res.status(500).json({ error: 'Failed to save site settings' });
+  }
+});
+
+// Delete site setting
+app.delete('/api/site-settings/:key', async (req, res) => {
+  try {
+    const { key } = req.params;
+    const result = await pool.query(
+      'DELETE FROM site_settings WHERE key = $1 RETURNING id',
+      [key]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Setting not found' });
+    }
+    res.json({ success: true, message: 'Setting deleted successfully' });
+  } catch (error) {
+    console.error('Site setting delete error:', error);
+    res.status(500).json({ error: 'Failed to delete site setting' });
+  }
+});
+
+// Get public settings only (for frontend)
+app.get('/api/site-settings/public', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT key, value, value_type as "valueType", category
+      FROM site_settings
+      WHERE is_public = true
+      ORDER BY category, key
+    `);
+    
+    // Convert to object format
+    const settings = {};
+    result.rows.forEach(row => {
+      settings[row.key] = row.value;
+    });
+    
+    res.json(settings);
+  } catch (error) {
+    console.error('Public site settings error:', error);
+    res.status(500).json({ error: 'Failed to fetch public settings' });
+  }
+});
+
+// 404 handler
 app.use((req, res) => {
-  // Don't serve index.html for API routes
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ error: 'API endpoint not found' });
-  }
-  
-  const indexPath = path.join(distPath, 'index.html');
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(404).send('index.html not found');
-  }
+  res.status(404).json({ error: 'Endpoint not found' });
 });
 
 // Error handler
@@ -2130,8 +2452,8 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
-  console.log(`📊 API: http://localhost:${PORT}/api`);
-  console.log(`🌐 Frontend: http://localhost:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`🚀 API Server running on http://localhost:${PORT}`);
+  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
 });
+
