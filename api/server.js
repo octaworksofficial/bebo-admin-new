@@ -32,6 +32,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// VERSION CHECK - Bu endpoint Railway'in hangi kodu çalıştırdığını gösterir
+app.get('/api/version', (req, res) => {
+  res.json({ 
+    version: '2.2.0-debug',
+    deployTime: '2025-12-03T00:00:00Z',
+    features: ['site-settings', 'refund', 'dashboard']
+  });
+});
+
 // ==================== PRODUCTS API ====================
 // ==================== PRODUCTS API ====================
 
