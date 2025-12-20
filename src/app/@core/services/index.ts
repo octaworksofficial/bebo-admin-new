@@ -8,3 +8,4 @@ export * from './about-content.service';
 export * from './contact-submissions.service';
 export * from './newsletter.service';
 export * from './settings.service';
+export * from './image-upload.service';

@@ -14,7 +14,7 @@ export class AboutContentService extends BaseApiService {
   }
 
   getContent(language: string = 'tr'): Observable<AboutContent> {
-    return this.get<AboutContent>(`${this.endpoint}?language=${language}`);
+    return this.get<AboutContent>(`${this.endpoint}/${language}`);
   }
 
   updateContent(language: string, content: Partial<AboutContent>): Observable<AboutContent> {

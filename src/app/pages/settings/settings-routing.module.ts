@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { SettingsComponent } from './settings.component';
 import { CreditSettingsComponent } from './credit-settings/credit-settings.component';
+import { AboutSettingsComponent } from './about-settings/about-settings.component';
 
 const routes: Routes = [{
   path: '',
@@ -15,6 +16,10 @@ const routes: Routes = [{
     {
       path: 'credit',
       component: CreditSettingsComponent,
+    },
+    {
+      path: 'about',
+      component: AboutSettingsComponent,
     },
   ],
 }];

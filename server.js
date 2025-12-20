@@ -1952,8 +1952,8 @@ app.put('/api/about-content/:language', async (req, res) => {
     
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
-    console.error('About content update error:', error);
-    res.status(500).json({ error: 'Failed to update about content' });
+    console.error('About content update error:', error && error.stack ? error.stack : error);
+    res.status(500).json({ error: 'Failed to update about content', details: error.message || String(error) });
   }
 });
 
@@ -2008,7 +2008,7 @@ app.get('/api/credit-settings', async (req, res) => {
       // Return default settings if none exist
       return res.json({
         id: null,
-        pricePerCredit: 100,
+        pricePerCredit:  100,
         isActive: true,
         minPurchase: 1,
         maxPurchase: 1000

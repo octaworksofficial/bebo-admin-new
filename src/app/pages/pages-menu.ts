@@ -68,4 +68,9 @@ export const MENU_ITEMS: NbMenuItem[] = [
     icon: 'settings-outline',
     link: '/pages/settings',
   },
+  {
+    title: 'Hakkımızda Ayarları',
+    icon: 'info-outline',
+    link: '/pages/settings/about',
+  },
 ];

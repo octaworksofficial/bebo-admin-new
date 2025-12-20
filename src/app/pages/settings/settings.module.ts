@@ -14,11 +14,13 @@ import {
 import { SettingsRoutingModule } from './settings-routing.module';
 import { SettingsComponent } from './settings.component';
 import { CreditSettingsComponent } from './credit-settings/credit-settings.component';
+import { AboutSettingsComponent } from './about-settings/about-settings.component';
 
 @NgModule({
   declarations: [
     SettingsComponent,
     CreditSettingsComponent,
+    AboutSettingsComponent,
   ],
   imports: [
     CommonModule,
