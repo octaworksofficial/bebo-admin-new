@@ -17,18 +17,18 @@ export class ProductFormComponent implements OnInit {
   productId: number;
   loading = false;
   submitting = false;
-  
+
   // Product data with sizes and frames
   product: ProductWithDetails | null = null;
   sizes: ProductSize[] = [];
   frames: ProductFrame[] = [];
-  
+
   // Size editing
   editingSizeId: number | null = null;
   sizeForm: FormGroup;
   showSizeForm = false;
   savingSize = false;
-  
+
   // Frame editing
   editingFrameId: number | null = null;
   frameForm: FormGroup;
@@ -37,6 +37,8 @@ export class ProductFormComponent implements OnInit {
 
   // Image upload states
   uploadingSquareImage = false;
+  uploadingSquareImage2 = false;
+  uploadingSquareImage3 = false;
   uploadingWideImage = false;
   uploadingFrameImage = false;
   uploadingFrameImageLarge = false;
@@ -75,6 +77,8 @@ export class ProductFormComponent implements OnInit {
       descriptionEn: [''],
       descriptionFr: [''],
       imageSquareUrl: [''],
+      imageSquareUrl2: [''],
+      imageSquareUrl3: [''],
       imageWideUrl: [''],
       imageDimensions: ['1920x1080', Validators.required],
       sizeLabel: ['Boyut Seçin', Validators.required],
@@ -157,7 +161,7 @@ export class ProductFormComponent implements OnInit {
           ? 'Ürün başarıyla güncellendi'
           : 'Ürün başarıyla oluşturuldu';
         this.toastrService.success(message, 'Başarılı');
-        
+
         if (!this.isEditMode && response?.id) {
           // Yeni ürün oluşturulduysa, düzenleme moduna geç
           this.router.navigate(['/pages/products/edit', response.id]);
@@ -179,7 +183,7 @@ export class ProductFormComponent implements OnInit {
   }
 
   // ==================== SIZE MANAGEMENT ====================
-  
+
   addSize(): void {
     this.editingSizeId = null;
     this.sizeForm.reset({ sortOrder: this.sizes.length, priceAmount: 0 });
@@ -252,12 +256,12 @@ export class ProductFormComponent implements OnInit {
   }
 
   // ==================== FRAME MANAGEMENT ====================
-  
+
   addFrame(): void {
     this.editingFrameId = null;
-    this.frameForm.reset({ 
-      sortOrder: this.frames.length, 
-      priceAmount: 0, 
+    this.frameForm.reset({
+      sortOrder: this.frames.length,
+      priceAmount: 0,
       colorCode: '#000000',
       mockupConfigType: 'frame',
       mockupConfigX: 12,
@@ -270,19 +274,19 @@ export class ProductFormComponent implements OnInit {
 
   editFrame(frame: ProductFrame): void {
     this.editingFrameId = frame.id;
-    
+
     // Parse mockup config if exists
     let mockupConfig = { type: 'frame', x: 12, y: 15, width: 76, height: 70 };
     if ((frame as any).mockupConfig) {
       try {
-        mockupConfig = typeof (frame as any).mockupConfig === 'string' 
-          ? JSON.parse((frame as any).mockupConfig) 
+        mockupConfig = typeof (frame as any).mockupConfig === 'string'
+          ? JSON.parse((frame as any).mockupConfig)
           : (frame as any).mockupConfig;
       } catch (e) {
         console.error('Error parsing mockup config:', e);
       }
     }
-    
+
     this.frameForm.patchValue({
       ...frame,
       priceAmount: frame.priceAmount / 100, // Convert from cents to TL
@@ -310,7 +314,7 @@ export class ProductFormComponent implements OnInit {
 
     this.savingFrame = true;
     const formValue = this.frameForm.value;
-    
+
     // Build mockup config JSON with type
     const mockupConfig = JSON.stringify({
       type: formValue.mockupConfigType || 'frame',
@@ -319,7 +323,7 @@ export class ProductFormComponent implements OnInit {
       width: formValue.mockupConfigWidth || 76,
       height: formValue.mockupConfigHeight || 70
     });
-    
+
     const frameData = {
       slug: formValue.slug,
       name: formValue.name,
@@ -391,11 +395,49 @@ export class ProductFormComponent implements OnInit {
         next: (response) => {
           this.productForm.patchValue({ imageSquareUrl: response.imageUrl });
           this.uploadingSquareImage = false;
-          this.toastrService.success('Kare görsel yüklendi', 'Başarılı');
+          this.toastrService.success('Kare görsel 1 yüklendi', 'Başarılı');
         },
         error: (error) => {
-          console.error('Square image upload error:', error);
+          console.error('Square image 1 upload error:', error);
           this.uploadingSquareImage = false;
+          this.toastrService.danger('Görsel yüklenemedi', 'Hata');
+        },
+      });
+    }
+  }
+
+  onSquareImage2Select(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.uploadingSquareImage2 = true;
+      this.imageUploadService.upload(input.files[0]).subscribe({
+        next: (response) => {
+          this.productForm.patchValue({ imageSquareUrl2: response.imageUrl });
+          this.uploadingSquareImage2 = false;
+          this.toastrService.success('Kare görsel 2 yüklendi', 'Başarılı');
+        },
+        error: (error) => {
+          console.error('Square image 2 upload error:', error);
+          this.uploadingSquareImage2 = false;
+          this.toastrService.danger('Görsel yüklenemedi', 'Hata');
+        },
+      });
+    }
+  }
+
+  onSquareImage3Select(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.uploadingSquareImage3 = true;
+      this.imageUploadService.upload(input.files[0]).subscribe({
+        next: (response) => {
+          this.productForm.patchValue({ imageSquareUrl3: response.imageUrl });
+          this.uploadingSquareImage3 = false;
+          this.toastrService.success('Kare görsel 3 yüklendi', 'Başarılı');
+        },
+        error: (error) => {
+          console.error('Square image 3 upload error:', error);
+          this.uploadingSquareImage3 = false;
           this.toastrService.danger('Görsel yüklenemedi', 'Hata');
         },
       });

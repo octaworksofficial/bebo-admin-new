@@ -8,6 +8,8 @@ export interface Product {
   descriptionEn?: string;
   descriptionFr?: string;
   imageSquareUrl?: string;
+  imageSquareUrl2?: string;
+  imageSquareUrl3?: string;
   imageWideUrl?: string;
   imageDimensions: string;
   sizeLabel: string;

@@ -64,6 +64,11 @@ export const MENU_ITEMS: NbMenuItem[] = [
     link: '/pages/site-settings',
   },
   {
+    title: 'Yasal Metinler',
+    icon: 'file-text-outline',
+    link: '/pages/legal-documents',
+  },
+  {
     title: 'Kredi Ayarları',
     icon: 'settings-outline',
     link: '/pages/settings',

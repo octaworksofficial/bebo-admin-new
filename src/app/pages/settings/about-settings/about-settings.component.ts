@@ -90,10 +90,10 @@ export class AboutSettingsComponent implements OnInit, OnDestroy {
       vision: content.vision,
     });
 
-    // Set image previews
-    if (content.image1) this.imagePreview['image1'] = content.image1;
-    if (content.image2) this.imagePreview['image2'] = content.image2;
-    if (content.image3) this.imagePreview['image3'] = content.image3;
+    // Reset image previews for the newly selected language
+    this.imagePreview['image1'] = content.image1 || undefined;
+    this.imagePreview['image2'] = content.image2 || undefined;
+    this.imagePreview['image3'] = content.image3 || undefined;
   }
 
   onLanguageChange(language: 'tr' | 'en' | 'fr'): void {
