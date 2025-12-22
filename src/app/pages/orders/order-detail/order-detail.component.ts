@@ -9,7 +9,7 @@ import { OrdersService } from '../../../@core/services/orders.service';
 })
 export class OrderDetailComponent implements OnInit {
   @Input() orderId: number;
-  
+
   order: any = null;
   loading = true;
   saving = false;
@@ -39,7 +39,7 @@ export class OrderDetailComponent implements OnInit {
     protected ref: NbDialogRef<OrderDetailComponent>,
     private ordersService: OrdersService,
     private toastrService: NbToastrService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadOrderDetail();
@@ -48,7 +48,7 @@ export class OrderDetailComponent implements OnInit {
   loadOrderDetail() {
     this.loading = true;
     this.error = null;
-    
+
     this.ordersService.getOrder(this.orderId).subscribe({
       next: (data) => {
         this.order = data;
@@ -179,7 +179,8 @@ export class OrderDetailComponent implements OnInit {
     }
 
     // Görsel URL'sinden dosyayı indir
-    const imageUrl = this.order.generatedImageUrl;
+    // productionImageUrl varsa onu kullan (watermarksız), yoksa generatedImageUrl (watermarklı)
+    const imageUrl = this.order.productionImageUrl || this.order.generatedImageUrl;
     const fileName = `siparis-${this.orderId}-gorsel.png`;
 
     fetch(imageUrl)
@@ -203,7 +204,7 @@ export class OrderDetailComponent implements OnInit {
 
   copyToClipboard(text: string) {
     if (!text) return;
-    
+
     navigator.clipboard.writeText(text).then(() => {
       // Başarılı kopyalama feedback'i
       console.log('Kopyalandı:', text);
@@ -232,15 +233,15 @@ export class OrderDetailComponent implements OnInit {
 
   confirmRefund(): void {
     if (this.refunding) return;
-    
+
     this.refunding = true;
-    
+
     // Tam iade yapılacak (amount parametresi gönderilmezse API tam iade yapar)
     this.ordersService.refundOrder(this.orderId, undefined, this.refundReason).subscribe({
       next: (response) => {
         this.refunding = false;
         this.showRefundConfirm = false;
-        
+
         if (response.success) {
           this.toastrService.success(
             `${response.refundAmount} TL iade edildi`,
