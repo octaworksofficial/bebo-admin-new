@@ -35,4 +35,23 @@ export interface Order {
   createdAt: Date;
   // API'den gelen ekstra alanlar (JOIN'lerden)
   productName?: string;
+  productNameEn?: string;
+  productSlug?: string;
+  productImageUrl?: string;
+
+  // Product size info
+  sizeName?: string;
+  sizeDimensions?: string;
+  sizePrice?: number;
+
+  // Product frame info
+  frameName?: string;
+  framePrice?: number;
+  frameColorCode?: string;
+
+  // Generated image info
+  generatedImageUrl?: string;
+  productionImageUrl?: string;
+  imagePrompt?: string;
+  creditsUsed?: number;
 }
