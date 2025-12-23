@@ -543,6 +543,7 @@ app.get('/api/orders/:id', async (req, res) => {
         o.merchant_oid as "merchantOid",
         o.payment_amount as "paymentAmount",
         o.total_amount as "totalAmount",
+        o.credit_amount as "creditAmount",
         o.currency,
         o.payment_status as "paymentStatus",
         o.payment_type as "paymentType",

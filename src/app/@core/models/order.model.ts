@@ -14,6 +14,7 @@ export interface Order {
   paymentType?: string;
   paytrToken?: string;
   orderType: 'product' | 'credit';
+  creditAmount?: number;
   failedReasonCode?: string;
   failedReasonMsg?: string;
   customerName: string;
