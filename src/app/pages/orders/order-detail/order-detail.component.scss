@@ -14,7 +14,7 @@ $gap: 12px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  
+
   nb-card-header {
     display: flex;
     justify-content: space-between;
@@ -22,14 +22,14 @@ $gap: 12px;
     padding: 12px 16px;
     border-bottom: 1px solid $border;
     flex-shrink: 0;
-    
+
     .title {
       font-size: 16px;
       font-weight: 600;
       color: $text-dark;
     }
   }
-  
+
   nb-card-body {
     padding: 16px;
     overflow-y: auto;
@@ -42,6 +42,7 @@ $gap: 12px;
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
@@ -69,7 +70,7 @@ $gap: 12px;
   padding: 12px;
   background: $bg-light;
   border-radius: $radius;
-  
+
   .skeleton-item {
     @extend .skeleton-base;
     width: 80px;
@@ -82,13 +83,14 @@ $gap: 12px;
   display: grid;
   grid-template-columns: 1.5fr 1fr;
   gap: $gap;
-  
+
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
   }
 }
 
-.skeleton-left, .skeleton-right {
+.skeleton-left,
+.skeleton-right {
   display: flex;
   flex-direction: column;
   gap: $gap;
@@ -131,14 +133,34 @@ $gap: 12px;
 .skeleton-line {
   @extend .skeleton-base;
   height: 14px;
-  
-  &.w-40 { width: 40%; }
-  &.w-50 { width: 50%; }
-  &.w-60 { width: 60%; }
-  &.w-70 { width: 70%; }
-  &.w-80 { width: 80%; }
-  &.w-90 { width: 90%; }
-  &.w-100 { width: 100%; }
+
+  &.w-40 {
+    width: 40%;
+  }
+
+  &.w-50 {
+    width: 50%;
+  }
+
+  &.w-60 {
+    width: 60%;
+  }
+
+  &.w-70 {
+    width: 70%;
+  }
+
+  &.w-80 {
+    width: 80%;
+  }
+
+  &.w-90 {
+    width: 90%;
+  }
+
+  &.w-100 {
+    width: 100%;
+  }
 }
 
 // Actions Skeleton
@@ -146,7 +168,7 @@ $gap: 12px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: $gap;
-  
+
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
   }
@@ -162,7 +184,7 @@ $gap: 12px;
   color: white;
   padding: 16px;
   border-radius: $radius;
-  
+
   nb-icon {
     font-size: 20px;
   }
@@ -184,38 +206,78 @@ $gap: 12px;
   background: $bg-light;
   border-radius: $radius;
   align-items: center;
-  
+
   .status-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    
+
     .label {
       font-size: 12px;
       color: $text-muted;
     }
-    
+
     .amount {
       color: $success;
       font-size: 14px;
     }
-    
+
     nb-badge {
       position: static !important;
     }
-    
+
     &.refund-action {
       margin-left: auto;
-      
+
       button {
         display: flex;
         align-items: center;
         gap: 4px;
-        
+
         nb-icon {
           font-size: 16px;
         }
       }
+    }
+  }
+}
+
+// Failed Payment Alert
+.failed-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 61, 113, 0.08);
+  border: 1px solid rgba(255, 61, 113, 0.3);
+  border-radius: $radius;
+
+  nb-icon {
+    font-size: 20px;
+    color: #ff3d71;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .failed-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    strong {
+      color: #ff3d71;
+      font-size: 14px;
+    }
+
+    span {
+      font-size: 13px;
+      color: $text-dark;
+      line-height: 1.4;
+    }
+
+    .failed-code {
+      font-size: 11px;
+      color: $text-muted;
     }
   }
 }
@@ -225,15 +287,15 @@ $gap: 12px;
   display: grid;
   grid-template-columns: 1.5fr 1fr;
   gap: $gap;
-  
+
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
   }
-  
+
   // Kredi siparişi için eşit kolonlar
   &.credit-layout {
     grid-template-columns: 1fr 1fr;
-    
+
     @media (max-width: 700px) {
       grid-template-columns: 1fr;
     }
@@ -255,7 +317,7 @@ $gap: 12px;
   .download-btn {
     padding: 4px 8px;
     font-size: 11px;
-    
+
     nb-icon {
       font-size: 16px;
     }
@@ -264,17 +326,19 @@ $gap: 12px;
 
 // Sol kolon - Ürün
 .left-col {
-  .product-box, .credit-box {
+
+  .product-box,
+  .credit-box {
     background: white;
     border: 1px solid $border;
     border-radius: $radius;
     padding: 12px;
   }
-  
+
   .product-content {
     display: flex;
     gap: 12px;
-    
+
     @media (max-width: 600px) {
       flex-direction: column;
     }
@@ -285,7 +349,7 @@ $gap: 12px;
     width: 140px;
     min-height: 140px;
     flex-shrink: 0;
-    
+
     @media (max-width: 600px) {
       width: 100%;
       max-width: 200px;
@@ -312,12 +376,10 @@ $gap: 12px;
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.5) 50%,
-        transparent 100%
-      );
+      background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.5) 50%,
+          transparent 100%);
       animation: shimmer 1.5s infinite;
     }
 
@@ -333,22 +395,26 @@ $gap: 12px;
     0% {
       left: -100%;
     }
+
     100% {
       left: 100%;
     }
   }
 
   @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
       opacity: 0.4;
       transform: scale(1);
     }
+
     50% {
       opacity: 0.7;
       transform: scale(1.05);
     }
   }
-  
+
   .product-img {
     width: 140px;
     height: auto;
@@ -358,21 +424,21 @@ $gap: 12px;
     cursor: pointer;
     opacity: 0;
     transition: opacity 0.3s ease, transform 0.2s ease;
-    
+
     &.image-loaded {
       opacity: 1;
     }
-    
+
     &:hover {
       transform: scale(1.02);
     }
-    
+
     @media (max-width: 600px) {
       width: 100%;
       max-width: 200px;
     }
   }
-  
+
   .product-details {
     flex: 1;
     display: flex;
@@ -380,13 +446,13 @@ $gap: 12px;
     gap: 8px;
     min-width: 0;
   }
-  
+
   .product-name {
     font-size: 14px;
     font-weight: 600;
     color: $text-dark;
   }
-  
+
   .prompt {
     font-size: 12px;
     font-style: italic;
@@ -398,21 +464,21 @@ $gap: 12px;
     line-height: 1.4;
     word-break: break-word;
   }
-  
+
   .specs {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    
+
     .spec {
       font-size: 12px;
       color: $text-dark;
-      
+
       span {
         color: $text-muted;
         margin-right: 4px;
       }
-      
+
       .color-dot {
         display: inline-block;
         width: 12px;
@@ -424,18 +490,18 @@ $gap: 12px;
       }
     }
   }
-  
+
   .prices {
     margin-top: auto;
     padding-top: 8px;
     border-top: 1px solid $border;
-    
+
     .price-row {
       display: flex;
       justify-content: space-between;
       font-size: 12px;
       padding: 2px 0;
-      
+
       &.total {
         font-weight: 600;
         color: $success;
@@ -445,12 +511,12 @@ $gap: 12px;
       }
     }
   }
-  
+
   // Kredi box
   .credit-box {
     height: 100%;
   }
-  
+
   .credit-content {
     display: flex;
     align-items: center;
@@ -459,13 +525,13 @@ $gap: 12px;
     padding: 24px 16px;
     background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
     border-radius: 8px;
-    
+
     @media (max-width: 500px) {
       flex-direction: column;
       gap: 16px;
     }
   }
-  
+
   .credit-visual {
     display: flex;
     align-items: center;
@@ -475,23 +541,23 @@ $gap: 12px;
     background: linear-gradient(135deg, #ffc107 0%, #f0ad4e 100%);
     border-radius: 50%;
     flex-shrink: 0;
-    
+
     .credit-icon {
       font-size: 32px;
       color: white;
     }
   }
-  
+
   .credit-info {
     text-align: center;
-    
+
     .credit-amount {
       font-size: 36px;
       font-weight: 700;
       color: #856404;
       line-height: 1;
     }
-    
+
     .credit-label {
       font-size: 14px;
       color: #997a00;
@@ -499,28 +565,28 @@ $gap: 12px;
       margin-top: 4px;
     }
   }
-  
+
   .credit-divider {
     width: 1px;
     height: 50px;
     background: #e0c67a;
-    
+
     @media (max-width: 500px) {
       width: 80px;
       height: 1px;
     }
   }
-  
+
   .credit-price-info {
     text-align: center;
-    
+
     .credit-price {
       font-size: 24px;
       font-weight: 600;
       color: $success;
       line-height: 1;
     }
-    
+
     .credit-price-label {
       font-size: 12px;
       color: $text-muted;
@@ -534,51 +600,51 @@ $gap: 12px;
   display: flex;
   flex-direction: column;
   gap: $gap;
-  
+
   .info-box {
     background: white;
     border: 1px solid $border;
     border-radius: $radius;
     padding: 12px;
   }
-  
+
   .info-row {
     display: flex;
     justify-content: space-between;
     font-size: 12px;
     padding: 4px 0;
     gap: 8px;
-    
+
     &:not(:last-child) {
       border-bottom: 1px solid $bg-light;
     }
-    
+
     span:first-child {
       color: $text-muted;
       flex-shrink: 0;
     }
-    
+
     span:last-child {
       color: $text-dark;
       text-align: right;
-      
+
       &.email {
         font-size: 11px;
         word-break: break-all;
       }
-      
+
       &.address {
         font-size: 11px;
         line-height: 1.4;
         word-break: break-word;
         max-width: 200px;
       }
-      
+
       &.copyable {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        
+
         .copy-icon {
           font-size: 12px;
           color: $text-muted;
@@ -586,12 +652,12 @@ $gap: 12px;
           opacity: 0.5;
           transition: all 0.2s ease;
           flex-shrink: 0;
-          
+
           &:hover {
             opacity: 1;
             color: $primary;
           }
-          
+
           &:active {
             transform: scale(0.9);
           }
@@ -606,28 +672,28 @@ $gap: 12px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: $gap;
-  
+
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
   }
-  
+
   .action-box {
     background: white;
     border: 1px solid $border;
     border-radius: $radius;
     padding: 12px;
   }
-  
+
   .action-form {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    
+
     textarea {
       resize: none;
       font-size: 12px;
     }
-    
+
     button {
       align-self: flex-end;
     }
@@ -643,11 +709,11 @@ $gap: 12px;
 .invoice-box {
   background: linear-gradient(135deg, rgba(51, 102, 255, 0.03) 0%, rgba(0, 214, 143, 0.03) 100%) !important;
   border-color: rgba(51, 102, 255, 0.15) !important;
-  
+
   .box-title {
     color: $primary;
   }
-  
+
   .info-row {
     nb-badge {
       font-size: 11px;
@@ -677,30 +743,31 @@ $gap: 12px;
   max-width: 420px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   animation: dialogSlideIn 0.2s ease-out;
-  
+
   @keyframes dialogSlideIn {
     from {
       opacity: 0;
       transform: scale(0.95) translateY(-10px);
     }
+
     to {
       opacity: 1;
       transform: scale(1) translateY(0);
     }
   }
-  
+
   .refund-dialog-header {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 16px 20px;
     border-bottom: 1px solid $border;
-    
+
     nb-icon {
       font-size: 24px;
       color: #ff3d71;
     }
-    
+
     h6 {
       margin: 0;
       font-size: 16px;
@@ -708,20 +775,20 @@ $gap: 12px;
       color: $text-dark;
     }
   }
-  
+
   .refund-dialog-body {
     padding: 20px;
-    
+
     p {
       margin: 0 0 12px;
       font-size: 14px;
       line-height: 1.5;
       color: $text-dark;
-      
+
       strong {
         color: $primary;
       }
-      
+
       &.warning-text {
         display: flex;
         align-items: center;
@@ -732,16 +799,16 @@ $gap: 12px;
         color: #ff3d71;
         font-size: 13px;
         margin-top: 16px;
-        
+
         nb-icon {
           font-size: 18px;
         }
       }
     }
-    
+
     .refund-reason {
       margin-top: 16px;
-      
+
       label {
         display: block;
         font-size: 12px;
@@ -749,14 +816,14 @@ $gap: 12px;
         color: $text-muted;
         margin-bottom: 6px;
       }
-      
+
       textarea {
         font-size: 13px;
         resize: none;
       }
     }
   }
-  
+
   .refund-dialog-actions {
     display: flex;
     justify-content: flex-end;
@@ -765,12 +832,12 @@ $gap: 12px;
     border-top: 1px solid $border;
     background: $bg-light;
     border-radius: 0 0 12px 12px;
-    
+
     button {
       display: flex;
       align-items: center;
       gap: 6px;
-      
+
       nb-icon {
         font-size: 16px;
       }
