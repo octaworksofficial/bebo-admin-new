@@ -2103,7 +2103,7 @@ app.get('/api/dashboard/stats', async (req, res) => {
         (SELECT COUNT(*) FROM "order" WHERE payment_status = 'pending' ${andDateFilter}) as "pendingOrders",
         (SELECT COUNT(*) FROM "order" WHERE payment_status = 'processing' ${andDateFilter}) as "processingOrders",
         (SELECT COUNT(*) FROM "order" WHERE payment_status = 'cancelled' ${andDateFilter}) as "cancelledOrders",
-        (SELECT COALESCE(SUM(CAST(total_amount AS DECIMAL)), 0) / 100 FROM "order" WHERE payment_status = 'success' ${andDateFilter}) as "totalRevenue",
+        (SELECT COALESCE(SUM(CAST(total_amount AS DECIMAL)), 0) FROM "order" WHERE payment_status = 'success' ${andDateFilter}) as "totalRevenue",
         (SELECT COUNT(*) FROM users ${dateFilter}) as "totalUsers",
         (SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '30 days') as "newUsersLast30Days",
         (SELECT COUNT(*) FROM generated_image ${dateFilter}) as "totalGeneratedImages",
@@ -2129,7 +2129,7 @@ app.get('/api/dashboard/orders-chart', async (req, res) => {
       SELECT 
         DATE(created_at) as date,
         COUNT(*) as count,
-        COALESCE(SUM(CAST(total_amount AS DECIMAL)), 0) / 100 as revenue
+        COALESCE(SUM(CAST(total_amount AS DECIMAL)), 0) as revenue
       FROM "order"
       ${dateFilter ? `WHERE ${dateFilter}` : ''}
       GROUP BY DATE(created_at)
