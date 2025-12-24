@@ -11,8 +11,13 @@ $info: #0095ff;
 
 // Skeleton Animation
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .orders-page {
@@ -25,19 +30,19 @@ $info: #0095ff;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  
+
   .header-left {
     display: flex;
     align-items: baseline;
     gap: 12px;
-    
+
     h4 {
       margin: 0;
       font-size: 20px;
       font-weight: 600;
       color: $text-dark;
     }
-    
+
     .order-count {
       font-size: 13px;
       color: $text-muted;
@@ -56,13 +61,13 @@ $info: #0095ff;
   gap: 16px;
   margin-bottom: 20px;
   flex-wrap: wrap;
-  
+
   .search-box {
     position: relative;
     flex: 1;
     min-width: 200px;
     max-width: 350px;
-    
+
     .search-icon {
       position: absolute;
       left: 12px;
@@ -71,19 +76,19 @@ $info: #0095ff;
       color: $text-muted;
       font-size: 18px;
     }
-    
+
     input {
       padding-left: 40px;
       width: 100%;
     }
   }
-  
+
   .filter-group {
     display: flex;
     gap: 10px;
     align-items: center;
     flex-wrap: wrap;
-    
+
     nb-select {
       min-width: 130px;
     }
@@ -103,7 +108,7 @@ $info: #0095ff;
   padding: 14px 16px;
   border-bottom: 1px solid $bg-light;
   gap: 16px;
-  
+
   &:last-child {
     border-bottom: none;
   }
@@ -115,14 +120,36 @@ $info: #0095ff;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
   height: 16px;
-  
-  &.id { width: 50px; }
-  &.name { width: 140px; }
-  &.product { width: 100px; }
-  &.amount { width: 70px; }
-  &.badge { width: 80px; height: 22px; border-radius: 11px; }
-  &.date { width: 110px; }
-  &.action { width: 24px; }
+
+  &.id {
+    width: 50px;
+  }
+
+  &.name {
+    width: 140px;
+  }
+
+  &.product {
+    width: 100px;
+  }
+
+  &.amount {
+    width: 70px;
+  }
+
+  &.badge {
+    width: 80px;
+    height: 22px;
+    border-radius: 11px;
+  }
+
+  &.date {
+    width: 110px;
+  }
+
+  &.action {
+    width: 24px;
+  }
 }
 
 // Table
@@ -136,10 +163,10 @@ $info: #0095ff;
 .orders-table {
   width: 100%;
   border-collapse: collapse;
-  
+
   thead {
     background: $bg-light;
-    
+
     tr {
       th {
         padding: 12px 16px;
@@ -151,16 +178,16 @@ $info: #0095ff;
         letter-spacing: 0.5px;
         border-bottom: 1px solid $border;
         white-space: nowrap;
-        
+
         &.sortable {
           cursor: pointer;
           user-select: none;
           transition: color 0.2s;
-          
+
           &:hover {
             color: $primary;
           }
-          
+
           nb-icon {
             font-size: 14px;
             margin-left: 4px;
@@ -170,20 +197,20 @@ $info: #0095ff;
       }
     }
   }
-  
+
   tbody {
     tr {
       cursor: pointer;
       transition: background 0.15s;
-      
+
       &:hover {
         background: rgba($primary, 0.04);
       }
-      
+
       &:not(:last-child) {
         border-bottom: 1px solid $bg-light;
       }
-      
+
       td {
         padding: 14px 16px;
         font-size: 13px;
@@ -206,14 +233,14 @@ $info: #0095ff;
     display: block;
     font-weight: 500;
   }
-  
+
   .customer-email {
     display: block;
     font-size: 11px;
     color: $text-muted;
     margin-top: 2px;
   }
-  
+
   .customer-address {
     display: block;
     font-size: 10px;
@@ -239,7 +266,7 @@ $info: #0095ff;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
-  
+
   nb-icon {
     font-size: 14px;
   }
@@ -257,13 +284,13 @@ $info: #0095ff;
 
 .action {
   text-align: right;
-  
+
   nb-icon {
     color: $text-muted;
     font-size: 18px;
     transition: color 0.2s, transform 0.2s;
   }
-  
+
   tr:hover & nb-icon {
     color: $primary;
     transform: translateX(3px);
@@ -283,42 +310,49 @@ $info: #0095ff;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  
+
   // Payment
   &.payment-pending {
     background: rgba($warning, 0.15);
     color: darken($warning, 15%);
   }
+
   &.payment-success {
     background: rgba($success, 0.15);
     color: darken($success, 10%);
   }
+
   &.payment-failed {
     background: rgba($danger, 0.15);
     color: $danger;
   }
+
   &.payment-refunded {
     background: rgba($info, 0.15);
     color: $info;
   }
-  
+
   // Shipping
   &.shipping-pending {
     background: rgba($warning, 0.15);
     color: darken($warning, 15%);
   }
+
   &.shipping-preparing {
     background: rgba($info, 0.15);
     color: $info;
   }
+
   &.shipping-shipped {
     background: rgba($primary, 0.15);
     color: $primary;
   }
+
   &.shipping-delivered {
     background: rgba($success, 0.15);
     color: darken($success, 10%);
   }
+
   &.shipping-cancelled {
     background: rgba($danger, 0.15);
     color: $danger;
@@ -329,20 +363,20 @@ $info: #0095ff;
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  
+
   nb-icon {
     font-size: 48px;
     color: $border;
     margin-bottom: 16px;
   }
-  
+
   p {
     margin: 0;
     font-size: 16px;
     font-weight: 500;
     color: $text-dark;
   }
-  
+
   span {
     font-size: 13px;
     color: $text-muted;
@@ -356,17 +390,17 @@ $info: #0095ff;
   align-items: center;
   margin-top: 16px;
   padding: 12px 0;
-  
+
   .pagination-info {
     font-size: 13px;
     color: $text-muted;
   }
-  
+
   .pagination-controls {
     display: flex;
     align-items: center;
     gap: 4px;
-    
+
     .page-numbers {
       display: flex;
       gap: 2px;
@@ -375,34 +409,66 @@ $info: #0095ff;
   }
 }
 
-// Dialog Override
+// Dialog Override - Sabit boyutlar
 ::ng-deep .fullscreen-dialog {
   .cdk-overlay-pane {
-    max-width: 90vw !important;
-    max-height: 90vh !important;
-    width: 90vw !important;
-    height: 90vh !important;
+    // Sabit genişlik ve yükseklik
+    width: 900px !important;
+    max-width: 95vw !important;
+    height: 85vh !important;
+    max-height: 95vh !important;
+    min-height: 500px !important;
   }
 
   nb-card {
-    height: 90vh;
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
     display: flex;
     flex-direction: column;
     margin: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+
+    nb-card-header {
+      flex-shrink: 0;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, #f8f9fc 0%, #eef2f7 100%);
+      border-bottom: 1px solid #e4e9f2;
+    }
 
     nb-card-body {
       flex: 1;
       overflow-y: auto;
-      padding: 16px;
-      
+      padding: 20px;
+      background: #f7f9fc;
+
       &::-webkit-scrollbar {
-        width: 6px;
+        width: 8px;
       }
-      
+
+      &::-webkit-scrollbar-track {
+        background: #f0f2f5;
+        border-radius: 4px;
+      }
+
       &::-webkit-scrollbar-thumb {
-        background: #d4d9e7;
-        border-radius: 3px;
+        background: #c4cad6;
+        border-radius: 4px;
+
+        &:hover {
+          background: #a8b2c1;
+        }
       }
+    }
+  }
+
+  // Responsive for smaller screens
+  @media (max-width: 960px) {
+    .cdk-overlay-pane {
+      width: 95vw !important;
+      height: 90vh !important;
     }
   }
 }
@@ -412,28 +478,29 @@ $info: #0095ff;
   .filters-section {
     flex-direction: column;
     align-items: stretch;
-    
+
     .search-box {
       max-width: none;
     }
-    
+
     .filter-group {
       justify-content: flex-start;
     }
   }
-  
+
   .orders-table {
     font-size: 12px;
-    
-    thead th, tbody td {
+
+    thead th,
+    tbody td {
       padding: 10px 8px;
     }
-    
+
     .customer-email {
       display: none;
     }
   }
-  
+
   .pagination {
     flex-direction: column;
     gap: 12px;
