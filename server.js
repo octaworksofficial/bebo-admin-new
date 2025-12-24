@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 
 // VERSION CHECK - Bu endpoint Railway'in hangi kodu çalıştırdığını gösterir
 app.get('/api/version', (req, res) => {
-  res.json({ 
+  res.json({
     version: '2.2.0-debug',
     deployTime: '2025-12-03T00:00:00Z',
     features: ['site-settings', 'refund', 'dashboard']
@@ -109,7 +109,7 @@ app.get('/api/products', async (req, res) => {
 app.get('/api/products/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Get product
     const productResult = await pool.query(`
       SELECT 
@@ -137,11 +137,11 @@ app.get('/api/products/:id', async (req, res) => {
       FROM product 
       WHERE id = $1
     `, [id]);
-    
+
     if (productResult.rows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    
+
     // Get sizes
     const sizesResult = await pool.query(`
       SELECT 
@@ -160,7 +160,7 @@ app.get('/api/products/:id', async (req, res) => {
       WHERE product_id = $1
       ORDER BY sort_order ASC
     `, [id]);
-    
+
     // Get frames
     const framesResult = await pool.query(`
       SELECT 
@@ -183,7 +183,7 @@ app.get('/api/products/:id', async (req, res) => {
       WHERE product_id = $1
       ORDER BY sort_order ASC
     `, [id]);
-    
+
     res.json({
       ...productResult.rows[0],
       sizes: sizesResult.rows,
@@ -203,7 +203,7 @@ app.post('/api/products', async (req, res) => {
       imageSquareUrl, imageWideUrl, imageDimensions, sizeLabel, sizeLabelEn,
       sizeLabelFr, frameLabel, frameLabelEn, frameLabelFr, isActive, sortOrder
     } = req.body;
-    
+
     const result = await pool.query(`
       INSERT INTO product (
         slug, name, name_en, name_fr, description, description_en, description_fr,
@@ -213,12 +213,12 @@ app.post('/api/products', async (req, res) => {
       RETURNING id
     `, [
       slug, name, nameEn, nameFr, description, descriptionEn, descriptionFr,
-      imageSquareUrl, imageWideUrl, imageDimensions || '1920x1080', 
+      imageSquareUrl, imageWideUrl, imageDimensions || '1920x1080',
       sizeLabel || 'Boyut Seçin', sizeLabelEn || 'Select Size', sizeLabelFr || 'Sélectionner la taille',
       frameLabel || 'Çerçeve Seçin', frameLabelEn || 'Select Frame', frameLabelFr || 'Sélectionner le cadre',
       isActive !== false, sortOrder || 0
     ]);
-    
+
     res.status(201).json({ id: result.rows[0].id, message: 'Product created successfully' });
   } catch (error) {
     console.error('Product create error:', error);
@@ -235,7 +235,7 @@ app.put('/api/products/:id', async (req, res) => {
       imageSquareUrl, imageWideUrl, imageDimensions, sizeLabel, sizeLabelEn,
       sizeLabelFr, frameLabel, frameLabelEn, frameLabelFr, isActive, sortOrder
     } = req.body;
-    
+
     const result = await pool.query(`
       UPDATE product SET
         slug = COALESCE($1, slug),
@@ -264,11 +264,11 @@ app.put('/api/products/:id', async (req, res) => {
       imageSquareUrl, imageWideUrl, imageDimensions, sizeLabel, sizeLabelEn,
       sizeLabelFr, frameLabel, frameLabelEn, frameLabelFr, isActive, sortOrder, id
     ]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    
+
     res.json({ message: 'Product updated successfully' });
   } catch (error) {
     console.error('Product update error:', error);
@@ -281,11 +281,11 @@ app.delete('/api/products/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query('DELETE FROM product WHERE id = $1 RETURNING id', [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    
+
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Product delete error:', error);
@@ -328,13 +328,13 @@ app.post('/api/products/:productId/sizes', async (req, res) => {
   try {
     const { productId } = req.params;
     const { slug, name, nameEn, nameFr, dimensions, priceAmount, sortOrder } = req.body;
-    
+
     const result = await pool.query(`
       INSERT INTO product_size (product_id, slug, name, name_en, name_fr, dimensions, price_amount, sort_order)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id
     `, [productId, slug, name, nameEn, nameFr, dimensions, priceAmount, sortOrder || 0]);
-    
+
     res.status(201).json({ id: result.rows[0].id, message: 'Size created successfully' });
   } catch (error) {
     console.error('Size create error:', error);
@@ -347,7 +347,7 @@ app.put('/api/products/:productId/sizes/:sizeId', async (req, res) => {
   try {
     const { productId, sizeId } = req.params;
     const { slug, name, nameEn, nameFr, dimensions, priceAmount, sortOrder } = req.body;
-    
+
     const result = await pool.query(`
       UPDATE product_size SET
         slug = COALESCE($1, slug),
@@ -361,11 +361,11 @@ app.put('/api/products/:productId/sizes/:sizeId', async (req, res) => {
       WHERE id = $8 AND product_id = $9
       RETURNING id
     `, [slug, name, nameEn, nameFr, dimensions, priceAmount, sortOrder, sizeId, productId]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Size not found' });
     }
-    
+
     res.json({ message: 'Size updated successfully' });
   } catch (error) {
     console.error('Size update error:', error);
@@ -381,11 +381,11 @@ app.delete('/api/products/:productId/sizes/:sizeId', async (req, res) => {
       'DELETE FROM product_size WHERE id = $1 AND product_id = $2 RETURNING id',
       [sizeId, productId]
     );
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Size not found' });
     }
-    
+
     res.json({ message: 'Size deleted successfully' });
   } catch (error) {
     console.error('Size delete error:', error);
@@ -432,13 +432,13 @@ app.post('/api/products/:productId/frames', async (req, res) => {
   try {
     const { productId } = req.params;
     const { slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, mockupTemplate, mockupConfig, sortOrder } = req.body;
-    
+
     const result = await pool.query(`
       INSERT INTO product_frame (product_id, slug, name, name_en, name_fr, price_amount, color_code, frame_image, frame_image_large, mockup_template, mockup_config, sort_order)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING id
     `, [productId, slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, mockupTemplate, mockupConfig, sortOrder || 0]);
-    
+
     res.status(201).json({ id: result.rows[0].id, message: 'Frame created successfully' });
   } catch (error) {
     console.error('Frame create error:', error);
@@ -451,7 +451,7 @@ app.put('/api/products/:productId/frames/:frameId', async (req, res) => {
   try {
     const { productId, frameId } = req.params;
     const { slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, mockupTemplate, mockupConfig, sortOrder } = req.body;
-    
+
     const result = await pool.query(`
       UPDATE product_frame SET
         slug = COALESCE($1, slug),
@@ -469,11 +469,11 @@ app.put('/api/products/:productId/frames/:frameId', async (req, res) => {
       WHERE id = $12 AND product_id = $13
       RETURNING id
     `, [slug, name, nameEn, nameFr, priceAmount, colorCode, frameImage, frameImageLarge, mockupTemplate, mockupConfig, sortOrder, frameId, productId]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Frame not found' });
     }
-    
+
     res.json({ message: 'Frame updated successfully' });
   } catch (error) {
     console.error('Frame update error:', error);
@@ -489,11 +489,11 @@ app.delete('/api/products/:productId/frames/:frameId', async (req, res) => {
       'DELETE FROM product_frame WHERE id = $1 AND product_id = $2 RETURNING id',
       [frameId, productId]
     );
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Frame not found' });
     }
-    
+
     res.json({ message: 'Frame deleted successfully' });
   } catch (error) {
     console.error('Frame delete error:', error);
@@ -550,6 +550,7 @@ app.get('/api/orders/:id', async (req, res) => {
         o.merchant_oid as "merchantOid",
         o.payment_amount as "paymentAmount",
         o.total_amount as "totalAmount",
+        o.credit_amount as "creditAmount",
         o.currency,
         o.payment_status as "paymentStatus",
         o.payment_type as "paymentType",
@@ -604,7 +605,7 @@ app.get('/api/orders/:id', async (req, res) => {
       LEFT JOIN generated_image gi ON o.generation_id = gi.generation_id
       WHERE o.id = $1
     `, [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -620,7 +621,7 @@ app.patch('/api/orders/:id/shipping', async (req, res) => {
   try {
     const { id } = req.params;
     const { shippingStatus, trackingNumber } = req.body;
-    
+
     const result = await pool.query(`
       UPDATE "order" 
       SET 
@@ -634,7 +635,7 @@ app.patch('/api/orders/:id/shipping', async (req, res) => {
         tracking_number as "trackingNumber",
         updated_at as "updatedAt"
     `, [shippingStatus, trackingNumber, id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -650,7 +651,7 @@ app.patch('/api/orders/:id/notes', async (req, res) => {
   try {
     const { id } = req.params;
     const { notes } = req.body;
-    
+
     const result = await pool.query(`
       UPDATE "order" 
       SET 
@@ -662,7 +663,7 @@ app.patch('/api/orders/:id/notes', async (req, res) => {
         notes,
         updated_at as "updatedAt"
     `, [notes, id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -683,7 +684,7 @@ app.post('/api/orders/:id/refund', async (req, res) => {
   try {
     const { id } = req.params;
     const { amount, reason } = req.body; // amount: iade tutarı (kuruş cinsinden), reason: iade nedeni
-    
+
     // Sipariş bilgisini al
     const orderResult = await pool.query(`
       SELECT 
@@ -696,40 +697,40 @@ app.post('/api/orders/:id/refund', async (req, res) => {
       FROM "order" 
       WHERE id = $1
     `, [id]);
-    
+
     if (orderResult.rows.length === 0) {
       return res.status(404).json({ error: 'Sipariş bulunamadı' });
     }
-    
+
     const order = orderResult.rows[0];
-    
+
     // Sadece başarılı ödemelerde iade yapılabilir
     if (order.paymentStatus !== 'success') {
       return res.status(400).json({ error: 'Sadece başarılı ödemelerde iade yapılabilir' });
     }
-    
+
     // İade tutarını belirle (tam iade veya kısmi iade)
     const orderTotal = order.totalAmount || order.paymentAmount;
     const refundAmount = amount ? parseFloat(amount) : orderTotal;
-    
+
     // İade tutarı sipariş tutarından fazla olamaz
     if (refundAmount > orderTotal) {
       return res.status(400).json({ error: 'İade tutarı sipariş tutarından fazla olamaz' });
     }
-    
+
     // PayTR API bilgileri
     const merchantId = process.env.PAYTR_MERCHANT_ID;
     const merchantKey = process.env.PAYTR_MERCHANT_KEY;
     const merchantSalt = process.env.PAYTR_MERCHANT_SALT;
-    
+
     if (!merchantId || !merchantKey || !merchantSalt) {
       console.error('PayTR credentials missing');
       return res.status(500).json({ error: 'PayTR yapılandırması eksik' });
     }
-    
+
     // İade tutarını TL formatına çevir (kuruştan TL'ye, 2 ondalık)
     const returnAmountTL = (refundAmount / 100).toFixed(2);
-    
+
     // PayTR token oluştur
     // Token: base64(hmac_sha256(merchant_id + merchant_oid + return_amount + merchant_salt, merchant_key))
     const hashStr = merchantId + order.merchantOid + returnAmountTL + merchantSalt;
@@ -737,7 +738,7 @@ app.post('/api/orders/:id/refund', async (req, res) => {
       .createHmac('sha256', merchantKey)
       .update(hashStr)
       .digest('base64');
-    
+
     // PayTR'a iade isteği gönder
     const postData = querystring.stringify({
       merchant_id: merchantId,
@@ -746,7 +747,7 @@ app.post('/api/orders/:id/refund', async (req, res) => {
       paytr_token: paytrToken,
       reference_no: `REFUND${id}T${Date.now()}`
     });
-    
+
     const options = {
       hostname: 'www.paytr.com',
       port: 443,
@@ -757,7 +758,7 @@ app.post('/api/orders/:id/refund', async (req, res) => {
         'Content-Length': Buffer.byteLength(postData)
       }
     };
-    
+
     // PayTR'a istek at
     const paytrResponse = await new Promise((resolve, reject) => {
       const req = https.request(options, (response) => {
@@ -771,19 +772,19 @@ app.post('/api/orders/:id/refund', async (req, res) => {
           }
         });
       });
-      
+
       req.on('error', (e) => reject(e));
       req.setTimeout(90000, () => {
         req.destroy();
         reject(new Error('PayTR isteği zaman aşımına uğradı'));
       });
-      
+
       req.write(postData);
       req.end();
     });
-    
+
     console.log('PayTR Refund Response:', paytrResponse);
-    
+
     // PayTR yanıtını kontrol et
     if (paytrResponse.status === 'success') {
       // Veritabanında siparişi güncelle
@@ -795,7 +796,7 @@ app.post('/api/orders/:id/refund', async (req, res) => {
           updated_at = NOW()
         WHERE id = $3
       `, [reason || 'İade yapıldı', returnAmountTL, id]);
-      
+
       res.json({
         success: true,
         message: 'İade işlemi başarılı',
@@ -812,7 +813,7 @@ app.post('/api/orders/:id/refund', async (req, res) => {
         errorCode: paytrResponse.err_no
       });
     }
-    
+
   } catch (error) {
     console.error('Refund error:', error);
     res.status(500).json({ error: 'İade işlemi sırasında hata oluştu: ' + error.message });
@@ -852,7 +853,7 @@ app.get('/api/users', async (req, res) => {
 app.get('/api/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // User bilgisi - generated_image count'u ayrı sorgu ile al
     const userResult = await pool.query(`
       SELECT 
@@ -871,7 +872,7 @@ app.get('/api/users/:id', async (req, res) => {
       FROM users u
       WHERE u.id = $1
     `, [id]);
-    
+
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -887,7 +888,7 @@ app.get('/api/users/:id', async (req, res) => {
       console.log('Generated images count error, trying text cast:', e.message);
       // Farklı tip denemesi
     }
-    
+
     // Kullanıcının siparişleri
     const ordersResult = await pool.query(`
       SELECT 
@@ -906,7 +907,7 @@ app.get('/api/users/:id', async (req, res) => {
       WHERE o.user_id = $1
       ORDER BY o.created_at DESC
     `, [id]);
-    
+
     // Kullanıcının oluşturduğu görseller - ayrı try-catch ile
     let generatedImages = [];
     try {
@@ -931,7 +932,7 @@ app.get('/api/users/:id', async (req, res) => {
     } catch (e) {
       console.log('Generated images fetch error:', e.message);
     }
-    
+
     res.json({
       ...userResult.rows[0],
       totalGenerations,
@@ -949,18 +950,18 @@ app.patch('/api/users/:id/credits', async (req, res) => {
   try {
     const { id } = req.params;
     const { artCredits } = req.body;
-    
+
     const result = await pool.query(`
       UPDATE users 
       SET art_credits = $1, updated_at = NOW()
       WHERE id = $2
       RETURNING id, art_credits as "artCredits", updated_at as "updatedAt"
     `, [artCredits, id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     res.json(result.rows[0]);
   } catch (error) {
     console.error('User credits update error:', error);
@@ -996,7 +997,7 @@ app.get('/api/generated-images/stats', async (req, res) => {
 app.get('/api/generated-images', async (req, res) => {
   try {
     const { userId, productId, isSelected, search, limit = 50, offset = 0 } = req.query;
-    
+
     let query = `
       SELECT 
         gi.id,
@@ -1020,37 +1021,37 @@ app.get('/api/generated-images', async (req, res) => {
       FROM generated_image gi
       LEFT JOIN product p ON gi.product_id = p.id
     `;
-    
+
     const conditions = [];
     const params = [];
-    
+
     if (userId) {
       params.push(userId);
       conditions.push(`gi.user_id = $${params.length}`);
     }
-    
+
     if (productId) {
       params.push(productId);
       conditions.push(`gi.product_id = $${params.length}`);
     }
-    
+
     if (isSelected === 'true') {
       conditions.push(`gi.is_selected = true`);
     } else if (isSelected === 'false') {
       conditions.push(`gi.is_selected = false`);
     }
-    
+
     if (search) {
       params.push(`%${search}%`);
       conditions.push(`(gi.text_prompt ILIKE $${params.length} OR gi.improved_prompt ILIKE $${params.length} OR EXISTS (SELECT 1 FROM "order" o WHERE o.user_id = gi.user_id AND o.customer_email ILIKE $${params.length}))`);
     }
-    
+
     if (conditions.length > 0) {
       query += ' WHERE ' + conditions.join(' AND ');
     }
-    
+
     query += ` ORDER BY gi.created_at DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
-    
+
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (error) {
@@ -1090,11 +1091,11 @@ app.get('/api/generated-images/:id', async (req, res) => {
       LEFT JOIN product p ON gi.product_id = p.id
       WHERE gi.id = $1
     `, [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Image not found' });
     }
-    
+
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Generated image fetch error:', error);
@@ -1125,11 +1126,11 @@ app.delete('/api/generated-images/:id', async (req, res) => {
     const result = await pool.query(`
       DELETE FROM generated_image WHERE id = $1 RETURNING id
     `, [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Image not found' });
     }
-    
+
     res.json({ message: 'Image deleted successfully' });
   } catch (error) {
     console.error('Generated image delete error:', error);
@@ -1143,7 +1144,7 @@ app.delete('/api/generated-images/:id', async (req, res) => {
 app.get('/api/legal-documents', async (req, res) => {
   try {
     const { language } = req.query;
-    
+
     let query = `
       SELECT 
         id,
@@ -1157,15 +1158,15 @@ app.get('/api/legal-documents', async (req, res) => {
         updated_at as "updatedAt"
       FROM legal_documents 
     `;
-    
+
     const params = [];
     if (language) {
       params.push(language);
       query += ` WHERE language = $1`;
     }
-    
+
     query += ` ORDER BY sort_order ASC, slug ASC`;
-    
+
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (error) {
@@ -1179,7 +1180,7 @@ app.get('/api/legal-documents/:slug', async (req, res) => {
   try {
     const { slug } = req.params;
     const { language } = req.query;
-    
+
     let query = `
       SELECT 
         id,
@@ -1194,19 +1195,19 @@ app.get('/api/legal-documents/:slug', async (req, res) => {
       FROM legal_documents 
       WHERE slug = $1
     `;
-    
+
     const params = [slug];
     if (language) {
       params.push(language);
       query += ` AND language = $2`;
     }
-    
+
     const result = await pool.query(query, params);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Legal document not found' });
     }
-    
+
     // Tek dil istendiyse tek obje, değilse array dön
     res.json(language ? result.rows[0] : result.rows);
   } catch (error) {
@@ -1220,7 +1221,7 @@ app.put('/api/legal-documents/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { title, content, isActive, sortOrder } = req.body;
-    
+
     const result = await pool.query(`
       UPDATE legal_documents 
       SET 
@@ -1241,11 +1242,11 @@ app.put('/api/legal-documents/:id', async (req, res) => {
         created_at as "createdAt",
         updated_at as "updatedAt"
     `, [title, content, isActive, sortOrder, id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Legal document not found' });
     }
-    
+
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Legal document update error:', error);
@@ -1257,7 +1258,7 @@ app.put('/api/legal-documents/:id', async (req, res) => {
 app.post('/api/legal-documents', async (req, res) => {
   try {
     const { slug, title, content, language, isActive, sortOrder } = req.body;
-    
+
     const result = await pool.query(`
       INSERT INTO legal_documents (slug, title, content, language, is_active, sort_order, created_at, updated_at)
       VALUES ($1, $2, $3, $4, COALESCE($5, true), COALESCE($6, 0), NOW(), NOW())
@@ -1272,7 +1273,7 @@ app.post('/api/legal-documents', async (req, res) => {
         created_at as "createdAt",
         updated_at as "updatedAt"
     `, [slug, title, content, language || 'tr', isActive, sortOrder]);
-    
+
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error('Legal document create error:', error);
@@ -1284,15 +1285,15 @@ app.post('/api/legal-documents', async (req, res) => {
 app.delete('/api/legal-documents/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const result = await pool.query(`
       DELETE FROM legal_documents WHERE id = $1 RETURNING id
     `, [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Legal document not found' });
     }
-    
+
     res.json({ message: 'Legal document deleted successfully' });
   } catch (error) {
     console.error('Legal document delete error:', error);
@@ -1327,7 +1328,7 @@ app.get('/api/contact-submissions/stats', async (req, res) => {
 app.get('/api/contact-submissions', async (req, res) => {
   try {
     const { status, search } = req.query;
-    
+
     let query = `
       SELECT 
         id,
@@ -1341,10 +1342,10 @@ app.get('/api/contact-submissions', async (req, res) => {
         created_at as "createdAt"
       FROM contact_submissions 
     `;
-    
+
     const conditions = [];
     const params = [];
-    
+
     if (status === 'unread') {
       conditions.push(`is_read = false`);
     } else if (status === 'read') {
@@ -1354,18 +1355,18 @@ app.get('/api/contact-submissions', async (req, res) => {
     } else if (status === 'not-replied') {
       conditions.push(`is_replied = false`);
     }
-    
+
     if (search) {
       params.push(`%${search}%`);
       conditions.push(`(full_name ILIKE $${params.length} OR email ILIKE $${params.length} OR subject ILIKE $${params.length} OR message ILIKE $${params.length})`);
     }
-    
+
     if (conditions.length > 0) {
       query += ' WHERE ' + conditions.join(' AND ');
     }
-    
+
     query += ' ORDER BY created_at DESC';
-    
+
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (error) {
@@ -1394,11 +1395,11 @@ app.get('/api/contact-submissions/:id', async (req, res) => {
       FROM contact_submissions 
       WHERE id = $1
     `, [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Submission not found' });
     }
-    
+
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Contact submission fetch error:', error);
@@ -1421,11 +1422,11 @@ app.patch('/api/contact-submissions/:id/read', async (req, res) => {
         is_read as "isRead",
         is_replied as "isReplied"
     `, [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Submission not found' });
     }
-    
+
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Mark as read error:', error);
@@ -1448,11 +1449,11 @@ app.patch('/api/contact-submissions/:id/replied', async (req, res) => {
         is_read as "isRead",
         is_replied as "isReplied"
     `, [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Submission not found' });
     }
-    
+
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Mark as replied error:', error);
@@ -1467,11 +1468,11 @@ app.delete('/api/contact-submissions/:id', async (req, res) => {
     const result = await pool.query(`
       DELETE FROM contact_submissions WHERE id = $1 RETURNING id
     `, [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Submission not found' });
     }
-    
+
     res.json({ message: 'Contact submission deleted successfully' });
   } catch (error) {
     console.error('Contact submission delete error:', error);
@@ -1483,18 +1484,18 @@ app.delete('/api/contact-submissions/:id', async (req, res) => {
 app.post('/api/contact-submissions/bulk-read', async (req, res) => {
   try {
     const { ids } = req.body;
-    
+
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ error: 'Invalid ids array' });
     }
-    
+
     const result = await pool.query(`
       UPDATE contact_submissions 
       SET is_read = true 
       WHERE id = ANY($1)
       RETURNING id
     `, [ids]);
-    
+
     res.json({ message: `${result.rowCount} submissions marked as read` });
   } catch (error) {
     console.error('Bulk mark as read error:', error);
@@ -1508,7 +1509,7 @@ app.post('/api/contact-submissions/bulk-read', async (req, res) => {
 app.get('/api/newsletter-subscribers', async (req, res) => {
   try {
     const { status, search } = req.query;
-    
+
     let query = `
       SELECT 
         id,
@@ -1522,26 +1523,26 @@ app.get('/api/newsletter-subscribers', async (req, res) => {
         updated_at as "updatedAt"
       FROM newsletter_subscribers 
     `;
-    
+
     const conditions = [];
     const params = [];
-    
+
     if (status && status !== 'all') {
       params.push(status);
       conditions.push(`status = $${params.length}`);
     }
-    
+
     if (search) {
       params.push(`%${search}%`);
       conditions.push(`(email ILIKE $${params.length} OR name ILIKE $${params.length})`);
     }
-    
+
     if (conditions.length > 0) {
       query += ' WHERE ' + conditions.join(' AND ');
     }
-    
+
     query += ' ORDER BY created_at DESC';
-    
+
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (error) {
@@ -1575,13 +1576,13 @@ app.patch('/api/newsletter-subscribers/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    
+
     if (!['active', 'unsubscribed', 'bounced'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
-    
+
     const unsubscribedAt = status === 'unsubscribed' ? 'NOW()' : 'NULL';
-    
+
     const result = await pool.query(`
       UPDATE newsletter_subscribers 
       SET status = $1, 
@@ -1590,11 +1591,11 @@ app.patch('/api/newsletter-subscribers/:id/status', async (req, res) => {
       WHERE id = $2
       RETURNING id, email, status
     `, [status, id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Subscriber not found' });
     }
-    
+
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Newsletter status update error:', error);
@@ -1606,16 +1607,16 @@ app.patch('/api/newsletter-subscribers/:id/status', async (req, res) => {
 app.delete('/api/newsletter-subscribers/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const result = await pool.query(
       'DELETE FROM newsletter_subscribers WHERE id = $1 RETURNING id, email',
       [id]
     );
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Subscriber not found' });
     }
-    
+
     res.json({ success: true, message: 'Subscriber deleted', data: result.rows[0] });
   } catch (error) {
     console.error('Newsletter delete error:', error);
@@ -1627,7 +1628,7 @@ app.delete('/api/newsletter-subscribers/:id', async (req, res) => {
 app.get('/api/newsletter-subscribers/export', async (req, res) => {
   try {
     const { status } = req.query;
-    
+
     let query = `
       SELECT 
         email,
@@ -1637,19 +1638,19 @@ app.get('/api/newsletter-subscribers/export', async (req, res) => {
         created_at as "subscribed_at"
       FROM newsletter_subscribers
     `;
-    
+
     if (status && status !== 'all') {
       query += ` WHERE status = $1`;
     }
-    
+
     query += ' ORDER BY created_at DESC';
-    
+
     const result = await pool.query(query, status && status !== 'all' ? [status] : []);
-    
+
     // CSV oluştur
     const headers = ['email', 'name', 'status', 'source', 'subscribed_at'];
     let csv = headers.join(',') + '\n';
-    
+
     result.rows.forEach(row => {
       const values = headers.map(h => {
         const val = row[h] || '';
@@ -1661,7 +1662,7 @@ app.get('/api/newsletter-subscribers/export', async (req, res) => {
       });
       csv += values.join(',') + '\n';
     });
-    
+
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename=newsletter-subscribers-${new Date().toISOString().split('T')[0]}.csv`);
     res.send(csv);
@@ -1694,8 +1695,8 @@ app.get('/api/art-credit-settings', async (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     message: 'Birebiro Admin API is running',
     version: '2.1.0',
     timestamp: new Date().toISOString(),
@@ -1719,7 +1720,7 @@ const initSettingsTable = async () => {
         updated_at TIMESTAMP DEFAULT NOW()
       )
     `);
-    
+
     // Varsayılan ayarları ekle (yoksa)
     const defaultSettings = [
       { key: 'about_title', value: 'Birebiro Hakkında' },
@@ -1733,7 +1734,7 @@ const initSettingsTable = async () => {
       { key: 'social_twitter', value: '' },
       { key: 'social_facebook', value: '' },
     ];
-    
+
     for (const setting of defaultSettings) {
       await pool.query(`
         INSERT INTO settings (key, value) 
@@ -1741,7 +1742,7 @@ const initSettingsTable = async () => {
         ON CONFLICT (key) DO NOTHING
       `, [setting.key, setting.value]);
     }
-    
+
     console.log('✅ Settings table initialized');
   } catch (error) {
     console.error('Settings table init error:', error);
@@ -1759,13 +1760,13 @@ app.get('/api/settings', async (req, res) => {
       FROM settings
       ORDER BY key
     `);
-    
+
     // Key-value formatına dönüştür
     const settings = {};
     result.rows.forEach(row => {
       settings[row.key] = row.value;
     });
-    
+
     res.json(settings);
   } catch (error) {
     console.error('Settings fetch error:', error);
@@ -1782,11 +1783,11 @@ app.get('/api/settings/:key', async (req, res) => {
       FROM settings
       WHERE key = $1
     `, [key]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Setting not found' });
     }
-    
+
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Setting fetch error:', error);
@@ -1798,7 +1799,7 @@ app.get('/api/settings/:key', async (req, res) => {
 app.put('/api/settings', async (req, res) => {
   try {
     const settings = req.body;
-    
+
     for (const [key, value] of Object.entries(settings)) {
       await pool.query(`
         INSERT INTO settings (key, value, updated_at) 
@@ -1806,7 +1807,7 @@ app.put('/api/settings', async (req, res) => {
         ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = NOW()
       `, [key, value]);
     }
-    
+
     res.json({ success: true, message: 'Settings updated successfully' });
   } catch (error) {
     console.error('Settings update error:', error);
@@ -1819,14 +1820,14 @@ app.patch('/api/settings/:key', async (req, res) => {
   try {
     const { key } = req.params;
     const { value } = req.body;
-    
+
     const result = await pool.query(`
       INSERT INTO settings (key, value, updated_at) 
       VALUES ($1, $2, NOW())
       ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = NOW()
       RETURNING key, value, updated_at as "updatedAt"
     `, [key, value]);
-    
+
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Setting update error:', error);
@@ -1864,7 +1865,7 @@ app.get('/api/about-content', async (req, res) => {
           WHEN 'fr' THEN 3 
         END
     `);
-    
+
     res.json(result.rows);
   } catch (error) {
     console.error('About content fetch error:', error);
@@ -1895,11 +1896,11 @@ app.get('/api/about-content/:language', async (req, res) => {
       FROM about_content
       WHERE language = $1
     `, [language]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'About content not found for this language' });
     }
-    
+
     res.json(result.rows[0]);
   } catch (error) {
     console.error('About content fetch error:', error);
@@ -1912,7 +1913,7 @@ app.put('/api/about-content/:language', async (req, res) => {
   try {
     const { language } = req.params;
     const { image1, title1, body1, image2, title2, body2, image3, title3, body3, mission, vision } = req.body;
-    
+
     const result = await pool.query(`
       UPDATE about_content
       SET 
@@ -1945,11 +1946,11 @@ app.put('/api/about-content/:language', async (req, res) => {
         vision,
         updated_at as "updatedAt"
     `, [image1, title1, body1, image2, title2, body2, image3, title3, body3, mission, vision, language]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'About content not found for this language' });
     }
-    
+
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('About content update error:', error && error.stack ? error.stack : error);
@@ -1962,10 +1963,10 @@ app.put('/api/about-content', async (req, res) => {
   try {
     const contents = req.body; // Array of content objects with language field
     const results = [];
-    
+
     for (const content of contents) {
       const { language, image1, title1, body1, image2, title2, body2, image3, title3, body3, mission, vision } = content;
-      
+
       const result = await pool.query(`
         UPDATE about_content
         SET 
@@ -1984,12 +1985,12 @@ app.put('/api/about-content', async (req, res) => {
         WHERE language = $12
         RETURNING id, language
       `, [image1, title1, body1, image2, title2, body2, image3, title3, body3, mission, vision, language]);
-      
+
       if (result.rows.length > 0) {
         results.push(result.rows[0]);
       }
     }
-    
+
     res.json({ success: true, message: 'About content updated successfully', updated: results });
   } catch (error) {
     console.error('About content bulk update error:', error);
@@ -2003,18 +2004,18 @@ app.put('/api/about-content', async (req, res) => {
 app.get('/api/credit-settings', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM art_credit_settings ORDER BY id LIMIT 1');
-    
+
     if (result.rows.length === 0) {
       // Return default settings if none exist
       return res.json({
         id: null,
-        pricePerCredit:  100,
+        pricePerCredit: 100,
         isActive: true,
         minPurchase: 1,
         maxPurchase: 1000
       });
     }
-    
+
     const row = result.rows[0];
     res.json({
       id: row.id,
@@ -2035,10 +2036,10 @@ app.get('/api/credit-settings', async (req, res) => {
 app.put('/api/credit-settings', async (req, res) => {
   try {
     const { pricePerCredit, isActive, minPurchase, maxPurchase } = req.body;
-    
+
     // Check if settings exist
     const existing = await pool.query('SELECT id FROM art_credit_settings ORDER BY id LIMIT 1');
-    
+
     let result;
     if (existing.rows.length === 0) {
       // Insert new settings
@@ -2060,7 +2061,7 @@ app.put('/api/credit-settings', async (req, res) => {
         RETURNING *
       `, [pricePerCredit, isActive, minPurchase, maxPurchase, existing.rows[0].id]);
     }
-    
+
     const row = result.rows[0];
     res.json({
       success: true,
@@ -2094,7 +2095,7 @@ app.get('/api/dashboard/stats', async (req, res) => {
     const period = req.query.period || '30';
     const dateFilter = period === 'all' ? '' : `WHERE created_at >= NOW() - INTERVAL '${period} days'`;
     const andDateFilter = period === 'all' ? '' : `AND created_at >= NOW() - INTERVAL '${period} days'`;
-    
+
     const stats = await pool.query(`
       SELECT 
         (SELECT COUNT(*) FROM "order" ${dateFilter}) as "totalOrders",
@@ -2123,7 +2124,7 @@ app.get('/api/dashboard/orders-chart', async (req, res) => {
   try {
     const days = parseInt(req.query.days) || null;
     const dateFilter = getDateFilter(days, 'created_at');
-    
+
     const result = await pool.query(`
       SELECT 
         DATE(created_at) as date,
@@ -2210,7 +2211,7 @@ app.get('/api/dashboard/orders-by-status', async (req, res) => {
   try {
     const days = parseInt(req.query.days) || null;
     const dateFilter = getDateFilter(days, 'created_at');
-    
+
     const result = await pool.query(`
       SELECT 
         payment_status as status,
@@ -2232,7 +2233,7 @@ app.get('/api/dashboard/top-products', async (req, res) => {
   try {
     const days = parseInt(req.query.days) || null;
     const dateFilter = days ? `AND o.created_at >= NOW() - INTERVAL '${days} days'` : '';
-    
+
     const result = await pool.query(`
       SELECT 
         p.id,
@@ -2323,7 +2324,7 @@ app.get('/api/site-settings/key/:key', async (req, res) => {
       FROM site_settings
       WHERE key = $1
     `, [key]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Setting not found' });
     }
@@ -2339,7 +2340,7 @@ app.put('/api/site-settings/:key', async (req, res) => {
   try {
     const { key } = req.params;
     const { value, valueType, category, label, description, isPublic } = req.body;
-    
+
     const result = await pool.query(`
       INSERT INTO site_settings (key, value, value_type, category, label, description, is_public, updated_at)
       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
@@ -2353,7 +2354,7 @@ app.put('/api/site-settings/:key', async (req, res) => {
         updated_at = NOW()
       RETURNING id
     `, [key, value, valueType || 'text', category || 'general', label, description, isPublic !== false]);
-    
+
     res.json({ success: true, id: result.rows[0].id, message: 'Setting saved successfully' });
   } catch (error) {
     console.error('Site setting upsert error:', error);
@@ -2365,11 +2366,11 @@ app.put('/api/site-settings/:key', async (req, res) => {
 app.put('/api/site-settings', async (req, res) => {
   try {
     const settings = req.body;
-    
+
     if (!Array.isArray(settings)) {
       return res.status(400).json({ error: 'Expected array of settings' });
     }
-    
+
     for (const setting of settings) {
       await pool.query(`
         INSERT INTO site_settings (key, value, value_type, category, label, description, is_public, updated_at)
@@ -2392,7 +2393,7 @@ app.put('/api/site-settings', async (req, res) => {
         setting.isPublic !== false
       ]);
     }
-    
+
     res.json({ success: true, message: 'Settings saved successfully' });
   } catch (error) {
     console.error('Site settings bulk update error:', error);
@@ -2408,7 +2409,7 @@ app.delete('/api/site-settings/:key', async (req, res) => {
       'DELETE FROM site_settings WHERE key = $1 RETURNING id',
       [key]
     );
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Setting not found' });
     }
@@ -2428,13 +2429,13 @@ app.get('/api/site-settings/public', async (req, res) => {
       WHERE is_public = true
       ORDER BY category, key
     `);
-    
+
     // Convert to object format
     const settings = {};
     result.rows.forEach(row => {
       settings[row.key] = row.value;
     });
-    
+
     res.json(settings);
   } catch (error) {
     console.error('Public site settings error:', error);
