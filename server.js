@@ -122,6 +122,8 @@ app.get('/api/products/:id', async (req, res) => {
         description_en as "descriptionEn",
         description_fr as "descriptionFr",
         image_square_url as "imageSquareUrl",
+        image_square_url_2 as "imageSquareUrl2",
+        image_square_url_3 as "imageSquareUrl3",
         image_wide_url as "imageWideUrl",
         image_dimensions as "imageDimensions",
         size_label as "sizeLabel",
