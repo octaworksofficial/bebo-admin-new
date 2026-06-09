@@ -4911,32 +4911,6 @@ app.get('/api/site-settings/public', async (req, res) => {
   }
 });
 
-// Compression middleware
-app.use(compression());
-
-// Angular static dosyalarını serve et
-const distPath = path.join(__dirname, 'dist');
-app.use(express.static(distPath));
-
-// Angular routing için - API olmayan tüm istekleri index.html'e yönlendir
-app.use((req, res, next) => {
-  // API isteklerini atla
-  if (req.path.startsWith('/api/')) {
-    return next();
-  }
-  // Angular index.html dosyasını gönder
-  res.sendFile(path.join(distPath, 'index.html'), (err) => {
-    if (err) {
-      next(err);
-    }
-  });
-});
-
-// 404 handler - sadece API istekleri için
-app.use((req, res) => {
-  res.status(404).json({ error: 'Endpoint not found' });
-});
-
 // Trigger daily email report via cronjob
 app.get('/api/reports/trigger-daily-email', async (req, res) => {
   try {
@@ -5068,6 +5042,34 @@ app.get('/api/reports/trigger-daily-email', async (req, res) => {
     res.status(500).json({ error: 'Failed to trigger daily report' });
   }
 });
+
+// Compression middleware
+app.use(compression());
+
+// Angular static dosyalarını serve et
+const distPath = path.join(__dirname, 'dist');
+app.use(express.static(distPath));
+
+// Angular routing için - API olmayan tüm istekleri index.html'e yönlendir
+app.use((req, res, next) => {
+  // API isteklerini atla
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
+  // Angular index.html dosyasını gönder
+  res.sendFile(path.join(distPath, 'index.html'), (err) => {
+    if (err) {
+      next(err);
+    }
+  });
+});
+
+// 404 handler - sadece API istekleri için
+app.use((req, res) => {
+  res.status(404).json({ error: 'Endpoint not found' });
+});
+
+
 
 // Error handler
 app.use((err, req, res, next) => {
