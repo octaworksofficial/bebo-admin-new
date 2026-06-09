@@ -57,6 +57,7 @@ export class OrderDetailComponent implements OnInit {
     this.ordersService.getOrder(this.orderId).subscribe({
       next: (data) => {
         this.order = data;
+        console.log('ORDER LOADED:', this.order);
         this.imageLoading = !!this.getPreviewImageUrl(data);
         this.trackingNumber = data.trackingNumber || '';
         this.shippingStatus = data.shippingStatus || 'pending';
@@ -171,12 +172,12 @@ export class OrderDetailComponent implements OnInit {
    * image_transform JSON string'ini parse eder
    * Format: {"x": number, "y": number, "scale": number}
    */
-  getImageTransform(): { x: number, y: number, scale: number } | null {
-    if (!this.order?.imageTransform) return null;
+  getImageTransform(item: any): { x: number, y: number, scale: number } | null {
+    if (!item?.imageTransform) return null;
     try {
-      const transform = typeof this.order.imageTransform === 'string'
-        ? JSON.parse(this.order.imageTransform)
-        : this.order.imageTransform;
+      const transform = typeof item.imageTransform === 'string'
+        ? JSON.parse(item.imageTransform)
+        : item.imageTransform;
       return {
         x: transform.x ?? 0,
         y: transform.y ?? 0,
@@ -192,8 +193,8 @@ export class OrderDetailComponent implements OnInit {
    * Transform uygulanmış mı kontrol eder
    * scale !== 1 veya x/y !== 0 ise transform uygulanmıştır
    */
-  hasImageTransform(): boolean {
-    const transform = this.getImageTransform();
+  hasImageTransform(item: any): boolean {
+    const transform = this.getImageTransform(item);
     if (!transform) return false;
     return transform.scale !== 1 || transform.x !== 0 || transform.y !== 0;
   }
@@ -202,8 +203,8 @@ export class OrderDetailComponent implements OnInit {
    * Scale değerini yüzde formatında döndürür
    * Örn: 1.5 -> "%150"
    */
-  getScalePercent(): string {
-    const transform = this.getImageTransform();
+  getScalePercent(item: any): string {
+    const transform = this.getImageTransform(item);
     if (!transform) return '%100';
     return `%${Math.round(transform.scale * 100)}`;
   }
@@ -223,8 +224,8 @@ export class OrderDetailComponent implements OnInit {
    * scale > 1: Büyütülmüş (crop var)
    * scale < 1: Küçültülmüş (boşluk var)
    */
-  getScaleType(): string {
-    const transform = this.getImageTransform();
+  getScaleType(item: any): string {
+    const transform = this.getImageTransform(item);
     if (!transform) return 'normal';
     if (transform.scale === 1) return 'Tam Sığdırılmış';
     if (transform.scale > 1) return 'Yakınlaştırılmış';
@@ -235,8 +236,8 @@ export class OrderDetailComponent implements OnInit {
    * Transform verilerini CSS style objesine dönüştürür
    * CSS transform: translate(X%, Y%) scale(scale)
    */
-  getImageTransformStyle(): { [key: string]: string } | null {
-    const transform = this.getImageTransform();
+  getImageTransformStyle(item: any): { [key: string]: string } | null {
+    const transform = this.getImageTransform(item);
     if (!transform) return null;
 
     // transform.x ve transform.y zaten yüzde olarak geliyorsa
@@ -266,19 +267,19 @@ export class OrderDetailComponent implements OnInit {
     event.target.src = 'assets/images/placeholder.png';
   }
 
-  hasProductionImage(order: any = this.order): boolean {
-    const imageUrl = order?.productionImageUrl;
+  hasProductionImage(item: any): boolean {
+    const imageUrl = item?.productionImageUrl;
     return typeof imageUrl === 'string' ? imageUrl.trim().length > 0 : !!imageUrl;
   }
 
   // Returns the preview image URL, absolute in production
-  getPreviewImageUrl(order: any = this.order): string | null {
-    const productionImageUrl = typeof order?.productionImageUrl === 'string'
-      ? order.productionImageUrl.trim()
-      : order?.productionImageUrl;
-    const generatedImageUrl = typeof order?.generatedImageUrl === 'string'
-      ? order.generatedImageUrl.trim()
-      : order?.generatedImageUrl;
+  getPreviewImageUrl(item: any): string | null {
+    const productionImageUrl = typeof item?.productionImageUrl === 'string'
+      ? item.productionImageUrl.trim()
+      : item?.productionImageUrl;
+    const generatedImageUrl = typeof item?.generatedImageUrl === 'string'
+      ? item.generatedImageUrl.trim()
+      : item?.generatedImageUrl;
     // Production image takes priority
     const { getAbsoluteImageUrl } = require('../../../@core/utils/image-url.util');
     if (productionImageUrl) {
@@ -288,45 +289,45 @@ export class OrderDetailComponent implements OnInit {
   }
 
   // Kullanıcının oluşturduğu orijinal AI görseli (www.birebiro.com'dan çekilir)
-  getGeneratedImageUrl(order: any = this.order): string | null {
-    const generatedImageUrl = typeof order?.generatedImageUrl === 'string'
-      ? order.generatedImageUrl.trim()
-      : order?.generatedImageUrl;
+  getGeneratedImageUrl(item: any): string | null {
+    const generatedImageUrl = typeof item?.generatedImageUrl === 'string'
+      ? item.generatedImageUrl.trim()
+      : item?.generatedImageUrl;
     if (!generatedImageUrl) return null;
     const { getAbsoluteImageUrl } = require('../../../@core/utils/image-url.util');
     return getAbsoluteImageUrl(generatedImageUrl, 'www');
   }
 
   // Replicate upscale sonucu üretim görseli (admin.birebiro.com'dan çekilir)
-  getProductionImageUrl(order: any = this.order): string | null {
-    const productionImageUrl = typeof order?.productionImageUrl === 'string'
-      ? order.productionImageUrl.trim()
-      : order?.productionImageUrl;
+  getProductionImageUrl(item: any): string | null {
+    const productionImageUrl = typeof item?.productionImageUrl === 'string'
+      ? item.productionImageUrl.trim()
+      : item?.productionImageUrl;
     if (!productionImageUrl) return null;
     const { getAbsoluteImageUrl } = require('../../../@core/utils/image-url.util');
     return getAbsoluteImageUrl(productionImageUrl, 'admin');
   }
 
   // Ön izleme görseli (preview_image_url - www.birebiro.com'dan)
-  getOrderPreviewImageUrl(order: any = this.order): string | null {
-    const previewUrl = typeof order?.previewImageUrl === 'string'
-      ? order.previewImageUrl.trim()
-      : order?.previewImageUrl;
+  getOrderPreviewImageUrl(item: any): string | null {
+    const previewUrl = typeof item?.previewImageUrl === 'string'
+      ? item.previewImageUrl.trim()
+      : item?.previewImageUrl;
     if (!previewUrl) return null;
     const { getAbsoluteImageUrl } = require('../../../@core/utils/image-url.util');
     return getAbsoluteImageUrl(previewUrl, 'www');
   }
 
-  downloadGeneratedImage(): void {
-    if (!this.hasProductionImage()) {
+  downloadGeneratedImage(item: any): void {
+    if (!this.hasProductionImage(item)) {
       return;
     }
 
     // Üretim görselini indir (kanvas kompozisyonu uygulanmış, baskıya hazır)
-    const imageUrl = this.getProductionImageUrl();
+    const imageUrl = this.getProductionImageUrl(item);
     if (!imageUrl) return;
-    const sizeDim = this.order?.sizeDimensions || '';
-    const fileName = `siparis-${this.orderId}-uretim-${sizeDim}.png`;
+    const sizeDim = item?.sizeDimensions || '';
+    const fileName = `siparis-${this.orderId}-item-${item.id}-uretim-${sizeDim}.png`;
 
     fetch(imageUrl)
       .then(response => response.blob())
@@ -580,15 +581,21 @@ export class OrderDetailComponent implements OnInit {
   }
 
   // ==================== ÜRETİM GÖRSELİ (REPLICATE UPSCALE + KANVAS KOMPOZİSYONU) ====================
-  generateProductionImage(force: boolean = false): void {
-    if (this.upscaling) return;
-    if (!force && this.hasProductionImage()) return;
+  // Butonlarda "upscaling" durumunu itemId ile takip etmek için
+  upscalingItems: { [itemId: number]: boolean } = {};
 
-    this.upscaling = true;
+  generateProductionImage(itemId: number, force: boolean = false): void {
+    if (this.upscalingItems[itemId]) return;
+    
+    // Find item
+    const item = this.order?.items?.find(i => i.id === itemId);
+    if (!force && this.hasProductionImage(item)) return;
 
-    this.ordersService.generateProductionImage(this.orderId, force).subscribe({
+    this.upscalingItems[itemId] = true;
+
+    this.ordersService.generateItemProductionImage(this.orderId, itemId, force).subscribe({
       next: (response) => {
-        this.upscaling = false;
+        this.upscalingItems[itemId] = false;
         if (response.success) {
           if (response.alreadyExists) {
             this.toastrService.info('Üretim görseli zaten mevcut', 'Bilgi', { duration: 3000 });
@@ -612,7 +619,7 @@ export class OrderDetailComponent implements OnInit {
         }
       },
       error: (err) => {
-        this.upscaling = false;
+        this.upscalingItems[itemId] = false;
         console.error('Production image generation error:', err);
         const errorMsg = err.error?.error || 'Üretim görseli oluşturulurken hata oluştu';
         const details = err.error?.details ? `\n${err.error.details}` : '';

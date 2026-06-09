@@ -142,173 +142,163 @@
         <!-- Left: Product/Credit -->
         <div class="left-col">
 
-          <!-- Product Order -->
-          <div *ngIf="order.orderType === 'product' && order.generationId" class="product-box">
-            <div class="box-title">
-              Ürün Bilgisi
-              <!-- Üretim görseli varsa: İndir + Yeniden Oluştur butonları -->
-              <button *ngIf="hasProductionImage() && !upscaling" nbButton size="tiny" status="primary" outline
-                (click)="downloadGeneratedImage()" class="download-btn" title="Üretim Görselini İndir (Baskıya Hazır)">
-                <nb-icon icon="download-outline"></nb-icon>
-                Üretim Görselini İndir
-              </button>
-              <button *ngIf="hasProductionImage() && !upscaling" nbButton size="tiny" status="warning" outline
-                (click)="generateProductionImage(true)" class="regenerate-btn" title="Üretim Görselini Yeniden Oluştur (Kanvas Kompozisyonu)">
-                <nb-icon icon="refresh-outline"></nb-icon>
-                Yeniden Oluştur
-              </button>
-              <!-- Üretim görseli yoksa ve upscale edilmiyorsa: Oluştur butonu -->
-              <button *ngIf="!hasProductionImage() && !upscaling" nbButton size="tiny" status="warning" outline
-                (click)="generateProductionImage()" class="upscale-btn" title="Üretim Görseli Oluştur (Upscale + Kanvas Kompozisyonu)">
-                <nb-icon icon="image-outline"></nb-icon>
-                Üretim Görseli Oluştur
-              </button>
-              <!-- Upscale devam ediyorsa: Sarı oluşturuluyor butonu -->
-              <button *ngIf="upscaling" nbButton size="tiny" status="warning" disabled class="upscale-btn generating">
-                <span class="inline-spinner" aria-hidden="true"></span>
-                Oluşturuluyor...
-              </button>
-            </div>
-            <div class="product-content">
-              <div class="images-column">
-                <!-- İki görsel yan yana: Kullanıcı Görseli + Üretim Görseli -->
-                <div class="dual-image-container">
-                  <!-- 1) Kullanıcı Görseli (Orijinal AI Görseli) -->
-                  <div class="image-box">
-                    <div class="image-box-label">Kullanıcı Görseli</div>
-                    <div class="product-img-container">
-                      <ng-container *ngIf="getGeneratedImageUrl() as genUrl">
-                        <div *ngIf="imageLoading" class="image-skeleton">
-                          <div class="skeleton-shimmer"></div>
-                          <div class="skeleton-icon">
-                            <nb-icon icon="image-outline"></nb-icon>
-                          </div>
+          <!-- Product Order Items -->
+          <ng-container *ngIf="order.orderType === 'product' && order.items?.length > 0">
+            <div *ngFor="let item of order.items; let idx = index" class="product-box mb-4" style="border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+              <div class="box-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <span>Ürün #{{ idx + 1 }} Bilgisi</span>
+                <div class="item-actions" style="display: flex; gap: 8px; align-items: center;">
+                  <!-- Üretim görseli varsa: İndir + Yeniden Oluştur butonları -->
+                  <button *ngIf="hasProductionImage(item) && !upscalingItems[item.id]" nbButton size="tiny" status="primary" outline
+                    (click)="downloadGeneratedImage(item)" class="download-btn" title="Üretim Görselini İndir (Baskıya Hazır)" style="height: 32px; display: inline-flex; align-items: center;">
+                    <nb-icon icon="download-outline"></nb-icon>
+                    İndir
+                  </button>
+                  <button *ngIf="hasProductionImage(item) && !upscalingItems[item.id]" nbButton size="tiny" status="warning" outline
+                    (click)="generateProductionImage(item.id, true)" class="regenerate-btn" title="Üretim Görselini Yeniden Oluştur (Kanvas Kompozisyonu)" style="height: 32px; display: inline-flex; align-items: center;">
+                    <nb-icon icon="refresh-outline"></nb-icon>
+                    Yeniden Oluştur
+                  </button>
+                  <!-- Üretim görseli yoksa ve upscale edilmiyorsa: Oluştur butonu -->
+                  <button *ngIf="!hasProductionImage(item) && !upscalingItems[item.id]" nbButton size="tiny" status="warning" outline
+                    (click)="generateProductionImage(item.id)" class="upscale-btn" title="Üretim Görseli Oluştur (Upscale + Kanvas Kompozisyonu)" style="height: 32px; display: inline-flex; align-items: center;">
+                    <nb-icon icon="image-outline"></nb-icon>
+                    Üretim Görseli Oluştur
+                  </button>
+                  <!-- Upscale devam ediyorsa: Sarı oluşturuluyor butonu -->
+                  <button *ngIf="upscalingItems[item.id]" nbButton size="tiny" status="warning" disabled class="upscale-btn generating" style="height: 32px; display: inline-flex; align-items: center;">
+                    <span class="inline-spinner" aria-hidden="true" style="margin-right: 5px;"></span>
+                    Oluşturuluyor...
+                  </button>
+                </div>
+              </div>
+
+              <div class="product-content">
+                <div class="images-column">
+                  <!-- İki görsel yan yana: Kullanıcı Görseli + Üretim Görseli -->
+                  <div class="dual-image-container" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <!-- 1) Kullanıcı Görseli (Orijinal AI Görseli) -->
+                    <div class="image-box" style="flex: 1; min-width: 200px;">
+                      <div class="image-box-label">Kullanıcı Görseli</div>
+                      <div class="product-img-container">
+                        <ng-container *ngIf="getGeneratedImageUrl(item) as genUrl">
+                          <img [src]="genUrl"
+                            class="product-img image-loaded clickable"
+                            [ngStyle]="getImageTransformStyle(item)"
+                            alt="Kullanıcı Görseli"
+                            (click)="openImageInNewTab(genUrl)"
+                            style="width: 100%; height: auto; border-radius: 4px;">
+                        </ng-container>
+                        <div *ngIf="!getGeneratedImageUrl(item)" class="production-image-placeholder">
+                          <nb-icon icon="image-outline"></nb-icon>
+                          <span>Görsel yok</span>
                         </div>
-                        <img [src]="genUrl" class="product-img"
-                          [class.image-loaded]="!imageLoading"
-                          class="product-img clickable"
-                          [ngStyle]="getImageTransformStyle()"
-                          alt="Kullanıcı Görseli"
-                          (click)="openImageInNewTab(genUrl)"
-                          (load)="imageLoading = false"
-                          (error)="imageLoading = false">
-                      </ng-container>
-                      <div *ngIf="!getGeneratedImageUrl()" class="production-image-placeholder">
-                        <nb-icon icon="image-outline"></nb-icon>
-                        <span>Görsel yok</span>
+                      </div>
+                    </div>
+
+                    <!-- 2) Üretim Görseli (Upscale + Kanvas Kompozisyonu) -->
+                    <div class="image-box" style="flex: 1; min-width: 200px;">
+                      <div class="image-box-label" style="display: flex; justify-content: space-between;">
+                        Üretim Görseli
+                      </div>
+                      <div class="product-img-container production-container">
+                        <ng-container *ngIf="getProductionImageUrl(item) as prodUrl">
+                          <img [src]="prodUrl"
+                            class="product-img production-img image-loaded clickable"
+                            alt="Üretim Görseli (Baskıya Hazır)"
+                            (click)="downloadGeneratedImage(item)"
+                            style="width: 100%; height: auto; border-radius: 4px;">
+                        </ng-container>
+
+                        <!-- Üretim görseli yoksa placeholder -->
+                        <ng-container *ngIf="!getProductionImageUrl(item)">
+                          <div *ngIf="upscalingItems[item.id]" class="production-image-placeholder" style="padding: 20px; text-align: center; background: #f7f9fc; border-radius: 4px;">
+                            <span class="placeholder-spinner" aria-hidden="true"></span>
+                            <span>Oluşturuluyor...</span>
+                          </div>
+                          <div *ngIf="!upscalingItems[item.id]" class="production-image-placeholder" style="padding: 20px; text-align: center; background: #f7f9fc; border-radius: 4px;">
+                            <nb-icon icon="expand-outline"></nb-icon>
+                            <span style="display: block; margin-top: 5px;">Henüz oluşturulmadı</span>
+                          </div>
+                        </ng-container>
                       </div>
                     </div>
                   </div>
 
-                  <!-- 2) Üretim Görseli (Upscale + Kanvas Kompozisyonu) -->
-                  <div class="image-box">
-                    <div class="image-box-label">
-                      Üretim Görseli
-                      <button *ngIf="hasProductionImage() && !upscaling" nbButton ghost size="tiny" status="primary"
-                        (click)="downloadGeneratedImage()" class="download-btn" title="Üretim Görselini İndir (Baskıya Hazır)">
-                        <nb-icon icon="download-outline"></nb-icon>
-                      </button>
-                    </div>
-                    <div class="product-img-container production-container">
-                      <ng-container *ngIf="getProductionImageUrl() as prodUrl">
-                        <div *ngIf="productionImageLoading" class="image-skeleton">
-                          <div class="skeleton-shimmer"></div>
-                          <div class="skeleton-icon">
-                            <nb-icon icon="image-outline"></nb-icon>
-                          </div>
-                        </div>
-                        <img [src]="prodUrl"
-                          [class.image-loaded]="!productionImageLoading"
-                          class="product-img production-img clickable"
-                          alt="Üretim Görseli (Baskıya Hazır)"
-                          (click)="downloadGeneratedImage()"
-                          (load)="productionImageLoading = false"
-                          (error)="productionImageLoading = false">
-                      </ng-container>
-
-                      <!-- Üretim görseli yoksa placeholder -->
-                      <ng-container *ngIf="!getProductionImageUrl()">
-                        <div *ngIf="upscaling" class="production-image-placeholder">
-                          <span class="placeholder-spinner" aria-hidden="true"></span>
-                          <span>Oluşturuluyor...</span>
-                        </div>
-                        <div *ngIf="!upscaling" class="production-image-placeholder">
-                          <nb-icon icon="expand-outline"></nb-icon>
-                          <span>Henüz oluşturulmadı</span>
-                        </div>
-                      </ng-container>
+                  <!-- 3) Ön İzleme Görseli (iki kutunun altında) -->
+                  <div class="image-box" *ngIf="getOrderPreviewImageUrl(item)" style="margin-top: 15px;">
+                    <div class="image-box-label">Ön İzleme Görseli</div>
+                    <div class="product-img-container">
+                      <img [src]="getOrderPreviewImageUrl(item)" class="product-img image-loaded clickable"
+                        alt="Ön İzleme Görseli"
+                        (click)="openImageInNewTab(getOrderPreviewImageUrl(item))"
+                        (error)="$event.target.style.display='none'"
+                        style="max-width: 100%; border-radius: 4px;">
                     </div>
                   </div>
                 </div>
 
-                <!-- 3) Ön İzleme Görseli (iki kutunun altında) -->
-                <div class="image-box" *ngIf="getOrderPreviewImageUrl()">
-                  <div class="image-box-label">Ön İzleme Görseli</div>
-                  <div class="product-img-container">
-                    <img [src]="getOrderPreviewImageUrl()" class="product-img clickable"
-                      alt="Ön İzleme Görseli"
-                      (click)="openImageInNewTab(getOrderPreviewImageUrl())"
-                      (error)="$event.target.style.display='none'">
+                <div class="product-details" style="margin-top: 15px;">
+                  <div class="product-name" style="font-weight: bold; margin-bottom: 5px;">{{ item.productName }}</div>
+                  <div class="prompt" *ngIf="item.imagePrompt" style="font-style: italic; color: #8f9bb3; margin-bottom: 10px;">"{{ item.imagePrompt }}"</div>
+                  <div class="specs" style="display: flex; gap: 15px; margin-bottom: 10px;">
+                    <div class="spec"><strong>Boyut:</strong> {{ item.sizeName }} ({{ item.sizeDimensions }})</div>
+                    <div class="spec"><strong>Çerçeve:</strong> {{ item.frameName }} <i *ngIf="item.frameColorCode"
+                        class="color-dot" [style.background]="item.frameColorCode" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 1px solid #ccc;"></i></div>
+                    <div class="spec"><strong>Yön:</strong> {{ item.orientation === 'portrait' ? 'Dikey' : 'Yatay' }}</div>
+                    <div class="spec"><strong>Adet:</strong> {{ item.quantity }}</div>
                   </div>
-                </div>
-              </div>
-              <div class="product-details">
-                <div class="product-name">{{ order.productName }}</div>
-                <div class="prompt" *ngIf="order.imagePrompt">"{{ order.imagePrompt }}"</div>
-                <div class="specs">
-                  <div class="spec"><span>Boyut:</span> {{ order.sizeName }} ({{ order.sizeDimensions }})</div>
-                  <div class="spec"><span>Çerçeve:</span> {{ order.frameName }} <i *ngIf="order.frameColorCode"
-                      class="color-dot" [style.background]="order.frameColorCode"></i></div>
-                </div>
-                <!-- Görsel Konumlandırma Bilgisi -->
-                <div class="image-transform-section" *ngIf="order.orderType === 'product'">
-                  <div class="transform-header">
-                    <nb-icon icon="crop-outline"></nb-icon>
-                    <span>Görsel Konumlandırma</span>
-                  </div>
-                  <div class="transform-details" *ngIf="getImageTransform(); let transform">
-                    <div class="transform-row">
-                      <span class="transform-label">Yakınlaştırma:</span>
-                      <span class="transform-value scale" [class.scaled]="transform.scale !== 1">
-                        {{ getScalePercent() }}
-                        <span class="scale-type">({{ getScaleType() }})</span>
-                      </span>
+
+                  <!-- Görsel Konumlandırma Bilgisi -->
+                  <div class="image-transform-section" style="background: #f7f9fc; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                    <div class="transform-header" style="font-weight: 600; margin-bottom: 5px;">
+                      <nb-icon icon="crop-outline"></nb-icon>
+                      <span>Görsel Konumlandırma</span>
                     </div>
-                    <div class="transform-row">
-                      <span class="transform-label">Pozisyon X:</span>
-                      <span class="transform-value" [class.shifted]="transform.x !== 0">
-                        {{ formatPosition(transform.x) }}
-                      </span>
+                    <div class="transform-details" *ngIf="getImageTransform(item); let transform">
+                      <div class="transform-row">
+                        <span class="transform-label">Yakınlaştırma:</span>
+                        <span class="transform-value scale" [class.scaled]="transform.scale !== 1">
+                          {{ getScalePercent(item) }}
+                          <span class="scale-type">({{ getScaleType(item) }})</span>
+                        </span>
+                      </div>
+                      <div class="transform-row">
+                        <span class="transform-label">Pozisyon X:</span>
+                        <span class="transform-value" [class.shifted]="transform.x !== 0">
+                          {{ formatPosition(transform.x) }}
+                        </span>
+                      </div>
+                      <div class="transform-row">
+                        <span class="transform-label">Pozisyon Y:</span>
+                        <span class="transform-value" [class.shifted]="transform.y !== 0">
+                          {{ formatPosition(transform.y) }}
+                        </span>
+                      </div>
+                      <!-- Baskı uyarısı: Crop varsa baskıcıya bilgi -->
+                      <div class="transform-warning" *ngIf="transform.scale > 1" style="color: #ffaa00; margin-top: 5px; font-size: 0.85rem;">
+                        <nb-icon icon="alert-circle-outline"></nb-icon>
+                        <span>Görsel yakınlaştırılmış, baskıda sadece görünen kısım basılacak.</span>
+                      </div>
+                      <div class="transform-warning" *ngIf="transform.scale < 1" style="color: #0095ff; margin-top: 5px; font-size: 0.85rem;">
+                        <nb-icon icon="alert-circle-outline"></nb-icon>
+                        <span>Görsel küçültülmüş, baskıda etrafında boşluk olacak.</span>
+                      </div>
                     </div>
-                    <div class="transform-row">
-                      <span class="transform-label">Pozisyon Y:</span>
-                      <span class="transform-value" [class.shifted]="transform.y !== 0">
-                        {{ formatPosition(transform.y) }}
-                      </span>
-                    </div>
-                    <!-- Baskı uyarısı: Crop varsa baskıcıya bilgi -->
-                    <div class="transform-warning" *ngIf="transform.scale > 1">
-                      <nb-icon icon="alert-circle-outline" status="warning"></nb-icon>
-                      <span>Görsel yakınlaştırılmış, baskıda sadece görünen kısım basılacak.</span>
-                    </div>
-                    <div class="transform-warning" *ngIf="transform.scale < 1">
-                      <nb-icon icon="alert-circle-outline" status="info"></nb-icon>
-                      <span>Görsel küçültülmüş, baskıda etrafında boşluk olacak.</span>
+                    <div class="transform-default" *ngIf="!getImageTransform(item)" style="color: #00d68f; font-size: 0.85rem;">
+                      <nb-icon icon="checkmark-circle-outline"></nb-icon>
+                      <span>Varsayılan (Ortalanmış)</span>
                     </div>
                   </div>
-                  <div class="transform-default" *ngIf="!getImageTransform()">
-                    <nb-icon icon="checkmark-circle-outline" status="success"></nb-icon>
-                    <span>Varsayılan (Ortalanmış)</span>
+
+                  <div class="prices" style="display: flex; gap: 15px; font-size: 0.9rem; color: #444;">
+                    <div class="price-row"><span>Birim Fiyat:</span> <strong>{{ kurusToTl(item.unitPrice) }} TL</strong></div>
+                    <div class="price-row total" *ngIf="item.quantity > 1"><span>Toplam:</span> <strong>{{ kurusToTl(item.unitPrice * item.quantity) }} TL</strong></div>
                   </div>
-                </div>
-                <div class="prices">
-                  <div class="price-row"><span>Boyut:</span><span>{{ kurusToTl(order.sizePrice) }} TL</span></div>
-                  <div class="price-row"><span>Çerçeve:</span><span>{{ kurusToTl(order.framePrice) }} TL</span></div>
-                  <div class="price-row total"><span>Toplam:</span><span>{{ getOrderTotal(order) }} TL</span></div>
                 </div>
               </div>
             </div>
-          </div>
+          </ng-container>
 
           <!-- Credit Order -->
           <div *ngIf="order.orderType === 'credit'" class="credit-box">
@@ -326,17 +316,6 @@
                 <div class="credit-price">{{ getOrderTotal(order) }} TL</div>
                 <div class="credit-price-label">Ödenen Tutar</div>
               </div>
-            </div>
-          </div>
-
-          <!-- Ön İzleme Görseli (bağımsız, generationId'den bağımsız) -->
-          <div class="product-box" *ngIf="getOrderPreviewImageUrl()">
-            <div class="box-title">Ön İzleme Görseli</div>
-            <div class="preview-image-standalone">
-              <img [src]="getOrderPreviewImageUrl()"
-                alt="Ön İzleme Görseli"
-                (click)="openImageInNewTab(getOrderPreviewImageUrl())"
-                (error)="$event.target.style.display='none'">
             </div>
           </div>
 

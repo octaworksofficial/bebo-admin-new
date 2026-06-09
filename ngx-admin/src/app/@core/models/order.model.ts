@@ -1,11 +1,41 @@
-export interface Order {
+export interface OrderItem {
   id: number;
-  userId: string;
+  orderId: number;
   generationId: string;
-  imageUrl?: string;
   productId: number;
   productSizeId: number;
   productFrameId: number;
+  orientation?: 'landscape' | 'portrait';
+  unitPrice: number;
+  quantity: number;
+  imageTransform?: string;
+  previewImageUrl?: string;
+  finalProductImageUrl?: string;
+  customImageUrl?: string;
+
+  productName?: string;
+  productNameEn?: string;
+  productSlug?: string;
+  productImageUrl?: string;
+  productDesi?: number;
+
+  sizeName?: string;
+  sizeDimensions?: string;
+  sizePrice?: number;
+
+  frameName?: string;
+  framePrice?: number;
+  frameColorCode?: string;
+
+  generatedImageUrl?: string;
+  productionImageUrl?: string;
+  imagePrompt?: string;
+  creditsUsed?: number;
+}
+
+export interface Order {
+  id: number;
+  userId: string;
   merchantOid: string;
   paymentAmount: number;
   totalAmount?: number;
@@ -35,32 +65,13 @@ export interface Order {
   geliverShippingCode?: string;
   notes?: string;
   paidAt?: Date;
-  orientation?: 'landscape' | 'portrait';
   updatedAt: Date;
   createdAt: Date;
-  // API'den gelen ekstra alanlar (JOIN'lerden)
-  productName?: string;
-  productNameEn?: string;
-  productSlug?: string;
-  productImageUrl?: string;
-  productDesi?: number;
 
-  // Product size info
-  sizeName?: string;
-  sizeDimensions?: string;
-  sizePrice?: number;
+  // New field for Order List
+  itemsCount?: number;
+  productName?: string; // aggregated product names
 
-  // Product frame info
-  frameName?: string;
-  framePrice?: number;
-  frameColorCode?: string;
-
-  // Generated image info
-  generatedImageUrl?: string;
-  productionImageUrl?: string;
-  imagePrompt?: string;
-  creditsUsed?: number;
-
-  // Image transform (görsel konumlandırma)
-  imageTransform?: string; // JSON string: {"x": number, "y": number, "scale": number}
+  // New field for Order Detail
+  items?: OrderItem[];
 }

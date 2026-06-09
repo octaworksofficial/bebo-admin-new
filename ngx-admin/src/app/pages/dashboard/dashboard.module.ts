@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import {
   NbCardModule,
   NbUserModule,
@@ -11,6 +12,8 @@ import {
   NbIconModule,
   NbBadgeModule,
   NbSelectModule,
+  NbSpinnerModule,
+  NbInputModule,
 } from '@nebular/theme';
 import { NgxEchartsModule } from 'ngx-echarts';
 
@@ -20,6 +23,7 @@ import { DashboardComponent } from './dashboard.component';
 @NgModule({
   imports: [
     CommonModule,
+    FormsModule,
     HttpClientModule,
     RouterModule,
     ThemeModule,
@@ -31,6 +35,8 @@ import { DashboardComponent } from './dashboard.component';
     NbIconModule,
     NbBadgeModule,
     NbSelectModule,
+    NbSpinnerModule,
+    NbInputModule,
     NgxEchartsModule,
   ],
   declarations: [

@@ -12,14 +12,9 @@ export function getAbsoluteImageUrl(url: string | null | undefined, domain: 'www
   if (!url) return null;
   // If already absolute (http/https), return as is
   if (/^https?:\/\//i.test(url)) return url;
-  // If starts with /api/files, prepend appropriate domain in production
   if (url.startsWith('/api/files')) {
-    if (environment.production) {
-      const baseUrl = domain === 'www' ? 'https://www.birebiro.com' : 'https://admin.birebiro.com';
-      return `${baseUrl}${url}`;
-    }
-    // In dev, backend is usually proxied, so relative is fine
-    return url;
+    const baseUrl = domain === 'www' ? 'https://www.birebiro.com' : 'https://admin.birebiro.com';
+    return `${baseUrl}${url}`;
   }
   return url;
 }

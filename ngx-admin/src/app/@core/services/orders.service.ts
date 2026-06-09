@@ -101,11 +101,12 @@ export class OrdersService extends BaseApiService {
 
   /**
    * Üretim görseli oluşturur (Replicate upscale + kanvas kompozisyonu)
-   * @param id Sipariş ID
+   * @param orderId Sipariş ID
+   * @param itemId Sipariş Kalem ID
    * @param force true ise mevcut üretim görselini yeniden oluşturur
    */
-  generateProductionImage(id: number, force: boolean = false): Observable<ProductionImageResponse> {
-    return this.http.post<ProductionImageResponse>(`${this.apiUrl}${this.endpoint}/${id}/generate-production-image`, { force });
+  generateItemProductionImage(orderId: number, itemId: number, force: boolean = false): Observable<ProductionImageResponse> {
+    return this.http.post<ProductionImageResponse>(`${this.apiUrl}${this.endpoint}/${orderId}/items/${itemId}/generate-production-image`, { force });
   }
 }
 

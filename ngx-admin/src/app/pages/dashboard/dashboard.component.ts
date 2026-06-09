@@ -137,6 +137,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   
   private resizeTimeout: any;
 
+  dailyReportEmails: string = '';
+  savingEmails: boolean = false;
+  emailSaveSuccess: boolean = false;
+
   ngOnInit() {
     // Theme subscription'ı başlat
     this.themeSubscription = this.themeService.getJsTheme()
@@ -154,8 +158,38 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     // View hazır olduktan sonra verileri yükle
     setTimeout(() => {
       this.loadDashboardData();
+      this.loadEmailSettings();
       this.cdr.detectChanges();
     }, 100);
+  }
+
+  loadEmailSettings() {
+    this.http.get<any>(`${this.apiUrl}/settings/daily_report_emails`).subscribe({
+      next: (data) => {
+        if (data && data.value) {
+          this.dailyReportEmails = data.value;
+        }
+      },
+      error: (err) => console.error('Failed to load email settings', err)
+    });
+  }
+
+  saveEmailList() {
+    this.savingEmails = true;
+    this.emailSaveSuccess = false;
+    this.http.put(`${this.apiUrl}/settings`, { daily_report_emails: this.dailyReportEmails }).subscribe({
+      next: () => {
+        this.savingEmails = false;
+        this.emailSaveSuccess = true;
+        setTimeout(() => this.emailSaveSuccess = false, 3000);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to save email settings', err);
+        this.savingEmails = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   ngOnDestroy() {

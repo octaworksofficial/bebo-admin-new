@@ -237,6 +237,29 @@
   </div>
 </div>
 
+<!-- Email List Config -->
+<div class="row mt-4 mb-4">
+  <div class="col-12">
+    <nb-card class="data-card">
+      <nb-card-header>
+        <span class="card-title">Günlük Rapor E-posta Listesi</span>
+      </nb-card-header>
+      <nb-card-body>
+        <p style="font-size: 13px; color: #8f9bb3; margin-bottom: 15px;">
+          Her gün saat 21:00'da gönderilecek olan otomatik istatistik raporu için alıcı e-posta adreslerini virgülle ayırarak girin. 
+          <span *ngIf="emailSaveSuccess" style="color: #00d68f; margin-left: 10px; font-weight: bold;">Başarıyla kaydedildi!</span>
+        </p>
+        <div style="display: flex; gap: 15px; align-items: flex-start;">
+          <textarea nbInput fullWidth rows="3" [(ngModel)]="dailyReportEmails" placeholder="ornek@mail.com, baska@mail.com" style="flex: 1;"></textarea>
+          <button nbButton status="primary" (click)="saveEmailList()" [nbSpinner]="savingEmails" nbSpinnerStatus="control">
+            Kaydet
+          </button>
+        </div>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
+
 <!-- Top Products -->
 <div class="row" *ngIf="topProducts.length > 0">
   <div class="col-12">

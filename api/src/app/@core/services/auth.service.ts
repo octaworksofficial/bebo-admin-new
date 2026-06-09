@@ -103,7 +103,8 @@ export class AuthService {
     const now = Date.now();
     
     // 5 başarısız denemeden sonra 5 dakika bekle
-    if (attempts.count >= 5 && (now - attempts.lastAttempt) < 5 * 60 * 1000) {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (!isLocalhost && attempts.count >= 5 && (now - attempts.lastAttempt) < 5 * 60 * 1000) {
       const remainingTime = Math.ceil((5 * 60 * 1000 - (now - attempts.lastAttempt)) / 1000 / 60);
       return { success: false, message: `Çok fazla başarısız deneme. ${remainingTime} dakika sonra tekrar deneyin.` };
     }
