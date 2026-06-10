@@ -21,7 +21,7 @@ export interface Coupon {
   providedIn: 'root'
 })
 export class CouponsService {
-  private apiUrl = environment.apiUrl + '/api/coupons';
+  private apiUrl = environment.apiUrl + '/coupons';
 
   constructor(private http: HttpClient) {}
 
