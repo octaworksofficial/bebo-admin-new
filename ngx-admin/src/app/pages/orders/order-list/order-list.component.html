@@ -126,8 +126,7 @@
           </td>
           <td class="amount">
             <div class="amount-value">
-              <span *ngIf="order.orderType === 'product'">{{ (order.totalAmount !== null ? order.totalAmount : order.paymentAmount) | kurusToTl }} ₺</span>
-              <span *ngIf="order.orderType !== 'product'">{{ order.totalAmount | kurusToTl }} ₺</span>
+              <div class="total-amount">{{ (order.paymentAmount !== null ? order.paymentAmount : order.totalAmount) | kurusToTl }} ₺</div>
             </div>
             <div *ngIf="order.couponCode" class="coupon-info" style="margin-top: 4px; font-size: 0.75rem; color: #00d68f; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
               <nb-icon icon="pricetags-outline" style="font-size: 0.85rem;"></nb-icon>

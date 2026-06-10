@@ -1707,9 +1707,18 @@ async function createParasutInvoice(order, contactId, items) {
     }];
   }
 
+  let remainingDiscount = order.discountAmount || 0; // in kuruş
+
   const invoiceDetailsData = invoiceItems.map(item => {
-    // Total price in TL for this line item (unitPrice is in kuruş)
     const unitPriceTL = (item.unitPrice / 100).toFixed(2);
+    
+    // Apply discount proportionally or greedily
+    let discountValueTL = 0;
+    if (remainingDiscount > 0) {
+      const discountToApply = Math.min(remainingDiscount, item.unitPrice * (item.quantity || 1));
+      discountValueTL = (discountToApply / 100).toFixed(2);
+      remainingDiscount -= discountToApply;
+    }
     
     return {
       type: 'sales_invoice_details',
@@ -1717,6 +1726,8 @@ async function createParasutInvoice(order, contactId, items) {
         quantity: item.quantity || 1,
         unit_price: unitPriceTL,
         vat_rate: 20,
+        discount_type: discountValueTL > 0 ? 'amount' : undefined,
+        discount_value: discountValueTL > 0 ? parseFloat(discountValueTL) : undefined,
         description: [
           item.productName || 'Birebiro Hizmet',
           item.sizeName ? `- ${item.sizeName}` : '',
@@ -1812,6 +1823,8 @@ app.post('/api/orders/:id/create-invoice', async (req, res) => {
         o.tax_number as "taxNumber",
         o.tax_office as "taxOffice",
         o.total_amount as "totalAmount",
+        o.payment_amount as "paymentAmount",
+        o.coupon_discount_amount as "discountAmount",
         o.payment_status as "paymentStatus",
         o.parasut_invoice_id as "parasutInvoiceId",
         o.order_type as "orderType",

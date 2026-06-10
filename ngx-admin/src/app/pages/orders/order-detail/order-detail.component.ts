@@ -147,12 +147,12 @@ export class OrderDetailComponent implements OnInit {
   }
 
   getOrderTotal(order: any): number {
-    // Öncelik sırası: totalAmount -> paymentAmount -> (sizePrice + framePrice)
+    // Öncelik sırası: paymentAmount -> totalAmount -> (sizePrice + framePrice)
     let total = 0;
-    if (order.totalAmount != null) {
-      total = order.totalAmount;
-    } else if (order.paymentAmount != null) {
+    if (order.paymentAmount != null) {
       total = order.paymentAmount;
+    } else if (order.totalAmount != null) {
+      total = order.totalAmount;
     } else if (order.orderType === 'product') {
       // Fiziksel ürün ise fiyatları topla
       total = (order.sizePrice || 0) + (order.framePrice || 0);
