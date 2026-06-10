@@ -15,6 +15,8 @@ export interface Coupon {
   createdAt?: Date;
   isActive?: boolean;
   usageCount?: number;
+  maxUsagePerUser?: number;
+  maxTotalUsage?: number;
 }
 
 @Injectable({

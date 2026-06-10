@@ -5074,6 +5074,7 @@ app.get('/api/reports/trigger-daily-email', async (req, res) => {
 
 // ==================== COUPONS & DISCOUNTS API ====================
 
+
 // Get all coupons
 app.get('/api/coupons', async (req, res) => {
   try {
@@ -5082,6 +5083,7 @@ app.get('/api/coupons', async (req, res) => {
         c.id, c.code, c.discount_type as "discountType", c.discount_value as "discountValue",
         c.applicability, c.product_id as "productId", c.created_at as "createdAt",
         c.is_active as "isActive", c.usage_count as "usageCount",
+        c.max_usage_per_user as "maxUsagePerUser", c.max_total_usage as "maxTotalUsage",
         p.name as "productName"
       FROM coupons c
       LEFT JOIN product p ON c.product_id = p.id
@@ -5097,7 +5099,7 @@ app.get('/api/coupons', async (req, res) => {
 // Create new coupon
 app.post('/api/coupons', async (req, res) => {
   try {
-    const { code, discountType, discountValue, applicability, productId } = req.body;
+    const { code, discountType, discountValue, applicability, productId, maxUsagePerUser, maxTotalUsage } = req.body;
     
     // Check if code already exists
     const existing = await pool.query('SELECT id FROM coupons WHERE code = $1', [code]);
@@ -5106,13 +5108,14 @@ app.post('/api/coupons', async (req, res) => {
     }
 
     const result = await pool.query(`
-      INSERT INTO coupons (code, discount_type, discount_value, applicability, product_id)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO coupons (code, discount_type, discount_value, applicability, product_id, max_usage_per_user, max_total_usage)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING 
         id, code, discount_type as "discountType", discount_value as "discountValue",
         applicability, product_id as "productId", created_at as "createdAt",
-        is_active as "isActive", usage_count as "usageCount"
-    `, [code, discountType, discountValue, applicability, applicability === 'product' ? productId : null]);
+        is_active as "isActive", usage_count as "usageCount",
+        max_usage_per_user as "maxUsagePerUser", max_total_usage as "maxTotalUsage"
+    `, [code, discountType, discountValue, applicability, applicability === 'product' ? productId : null, maxUsagePerUser || 1, maxTotalUsage || null]);
     
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
@@ -5125,7 +5128,7 @@ app.post('/api/coupons', async (req, res) => {
 app.put('/api/coupons/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { code, discountType, discountValue, applicability, productId, isActive } = req.body;
+    const { code, discountType, discountValue, applicability, productId, isActive, maxUsagePerUser, maxTotalUsage } = req.body;
 
     const result = await pool.query(`
       UPDATE coupons SET
@@ -5134,10 +5137,12 @@ app.put('/api/coupons/:id', async (req, res) => {
         discount_value = COALESCE($3, discount_value),
         applicability = COALESCE($4, applicability),
         product_id = COALESCE($5, product_id),
-        is_active = COALESCE($6, is_active)
-      WHERE id = $7
+        is_active = COALESCE($6, is_active),
+        max_usage_per_user = COALESCE($7, max_usage_per_user),
+        max_total_usage = COALESCE($8, max_total_usage)
+      WHERE id = $9
       RETURNING *
-    `, [code, discountType, discountValue, applicability, applicability === 'product' ? productId : null, isActive, id]);
+    `, [code, discountType, discountValue, applicability, applicability === 'product' ? productId : null, isActive, maxUsagePerUser, maxTotalUsage, id]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Kupon bulunamadı.' });

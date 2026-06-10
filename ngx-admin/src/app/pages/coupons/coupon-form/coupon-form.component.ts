@@ -22,7 +22,9 @@ export class CouponFormComponent implements OnInit {
     discountType: 'percentage',
     discountValue: 0,
     applicability: 'all',
-    productId: null
+    productId: null,
+    maxUsagePerUser: 1,
+    maxTotalUsage: null
   };
 
   constructor(
@@ -40,7 +42,9 @@ export class CouponFormComponent implements OnInit {
         discountType: this.couponData.discountType || 'percentage',
         discountValue: this.couponData.discountValue || 0,
         applicability: this.couponData.applicability || 'all',
-        productId: this.couponData.productId || null
+        productId: this.couponData.productId || null,
+        maxUsagePerUser: this.couponData.maxUsagePerUser || 1,
+        maxTotalUsage: this.couponData.maxTotalUsage || null
       };
     }
   }

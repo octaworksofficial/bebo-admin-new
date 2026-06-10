@@ -16,7 +16,7 @@
             <th>Kupon Kodu</th>
             <th>İndirim</th>
             <th>Uygulanabilirlik</th>
-            <th>Kullanım</th>
+            <th>Kullanım Durumu</th>
             <th>Oluşturulma</th>
             <th>İşlemler</th>
           </tr>
@@ -37,7 +37,10 @@
                 Ürüne Özel
               </span>
             </td>
-            <td>{{ coupon.usageCount }} kez</td>
+            <td>
+              {{ coupon.usageCount }} / {{ coupon.maxTotalUsage || '∞' }}
+              <br><small class="text-muted">Kişi başı: {{ coupon.maxUsagePerUser || '∞' }}</small>
+            </td>
             <td>{{ coupon.createdAt | date:'shortDate' }}</td>
             <td>
               <button nbButton size="tiny" status="info" class="mr-2" (click)="openEditCouponDialog(coupon)">
