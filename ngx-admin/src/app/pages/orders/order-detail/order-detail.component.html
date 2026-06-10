@@ -93,6 +93,15 @@
           <span class="label">Tutar</span>
           <strong class="amount">{{ getOrderTotal(order) }} TL</strong>
         </div>
+        <div class="status-item" *ngIf="order.couponCode">
+          <span class="label">Kupon İndirimi</span>
+          <div style="display: flex; align-items: center; gap: 4px; background: #e6f6e6; color: #00d68f; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+            <nb-icon icon="pricetags-outline"></nb-icon>
+            <span>{{ order.couponCode }}</span>
+            <span *ngIf="order.discountType === 'percentage'">(-%{{ order.discountValue }})</span>
+            <span *ngIf="order.discountType === 'fixed_amount'">(-{{ kurusToTl(order.discountValue) }} TL)</span>
+          </div>
+        </div>
         <div class="status-item">
           <span class="label">Tip</span>
           <nb-badge [status]="order.orderType === 'credit' ? 'warning' : 'info'"
@@ -329,6 +338,14 @@
             <div class="box-title">Sipariş</div>
             <div class="info-row"><span>No:</span><span>{{ order.id }}</span></div>
             <div class="info-row"><span>Tarih:</span><span>{{ order.createdAt | date:'dd.MM.yy HH:mm' }}</span></div>
+            <div class="info-row" *ngIf="order.couponCode">
+              <span>Kupon:</span>
+              <span style="color: #00d68f; font-weight: 600;">
+                <nb-icon icon="pricetags-outline"></nb-icon> {{ order.couponCode }}
+                <small *ngIf="order.discountType === 'percentage'">(-%{{ order.discountValue }})</small>
+                <small *ngIf="order.discountType === 'fixed_amount'">(-{{ kurusToTl(order.discountValue) }} TL)</small>
+              </span>
+            </div>
             <div class="info-row" *ngIf="order.trackingNumber">
               <span>Takip:</span>
               <span class="copyable">
