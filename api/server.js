@@ -1959,6 +1959,9 @@ app.get('/api/orders', async (req, res) => {
         o.tracking_number as "trackingNumber",
         o.created_at as "createdAt",
         o.updated_at as "updatedAt",
+        c.code as "couponCode",
+        c.discount_type as "discountType",
+        o.coupon_discount_amount as "discountValue",
         CASE 
           WHEN o.order_type = 'product' AND (SELECT COUNT(*) FROM order_item WHERE order_id = o.id) = 0 THEN 1
           ELSE (SELECT COUNT(*) FROM order_item WHERE order_id = o.id)
@@ -1968,6 +1971,7 @@ app.get('/api/orders', async (req, res) => {
           (SELECT p.name FROM product p WHERE p.id = o.product_id)
         ) as "productName"
       FROM "order" o
+      LEFT JOIN coupons c ON o.coupon_id = c.id
       ORDER BY o.created_at DESC
     `);
     res.json(result.rows);
@@ -2018,10 +2022,15 @@ app.get('/api/orders/:id', async (req, res) => {
         o.created_at as "createdAt",
         o.updated_at as "updatedAt",
         
+        c.code as "couponCode",
+        c.discount_type as "discountType",
+        o.coupon_discount_amount as "discountValue",
+        
         -- User info
         u.art_credits as "userArtCredits"
       FROM "order" o
       LEFT JOIN users u ON o.user_id = u.id
+      LEFT JOIN coupons c ON o.coupon_id = c.id
       WHERE o.id = $1
     `, [id]);
 
