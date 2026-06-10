@@ -71,6 +71,9 @@ export interface Order {
   // New field for Order List
   itemsCount?: number;
   productName?: string; // aggregated product names
+  couponCode?: string;
+  discountType?: string;
+  discountValue?: number;
 
   // New field for Order Detail
   items?: OrderItem[];

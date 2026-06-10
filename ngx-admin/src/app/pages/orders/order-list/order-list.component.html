@@ -125,8 +125,16 @@
             </div>
           </td>
           <td class="amount">
-            <span *ngIf="order.orderType === 'product'">{{ order.totalAmount || order.paymentAmount | kurusToTl }} ₺</span>
-            <span *ngIf="order.orderType !== 'product'">{{ order.totalAmount | kurusToTl }} ₺</span>
+            <div class="amount-value">
+              <span *ngIf="order.orderType === 'product'">{{ (order.totalAmount !== null ? order.totalAmount : order.paymentAmount) | kurusToTl }} ₺</span>
+              <span *ngIf="order.orderType !== 'product'">{{ order.totalAmount | kurusToTl }} ₺</span>
+            </div>
+            <div *ngIf="order.couponCode" class="coupon-info" style="margin-top: 4px; font-size: 0.75rem; color: #00d68f; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+              <nb-icon icon="pricetags-outline" style="font-size: 0.85rem;"></nb-icon>
+              <span style="font-weight: 600;">{{ order.couponCode }}</span>
+              <span *ngIf="order.discountType === 'percentage'">(-%{{ order.discountValue }})</span>
+              <span *ngIf="order.discountType === 'fixed_amount'">(-{{ order.discountValue | kurusToTl }} ₺)</span>
+            </div>
           </td>
           <td>
             <span class="status-badge" [class]="'payment-' + order.paymentStatus">
