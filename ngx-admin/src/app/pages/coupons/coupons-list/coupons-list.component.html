@@ -1,0 +1,58 @@
+
+<nb-card [nbSpinner]="loading">
+  <nb-card-header class="d-flex justify-content-between align-items-center">
+    <span>Kuponlar & İndirimler</span>
+    <button nbButton status="primary" size="small" (click)="openAddCouponDialog()">
+      <nb-icon icon="plus-outline"></nb-icon> Yeni Kupon
+    </button>
+  </nb-card-header>
+
+  <nb-card-body>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Durum</th>
+            <th>Kupon Kodu</th>
+            <th>İndirim</th>
+            <th>Uygulanabilirlik</th>
+            <th>Kullanım</th>
+            <th>Oluşturulma</th>
+            <th>İşlemler</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let coupon of coupons">
+            <td>
+              <nb-toggle [checked]="coupon.isActive" (checkedChange)="toggleActive(coupon, $event)"></nb-toggle>
+            </td>
+            <td><strong>{{ coupon.code }}</strong></td>
+            <td>
+              {{ coupon.discountValue }}
+              {{ coupon.discountType === 'percentage' ? '%' : '₺' }}
+            </td>
+            <td>
+              <span *ngIf="coupon.applicability === 'all'" class="badge badge-success">Tüm Ürünler</span>
+              <span *ngIf="coupon.applicability === 'product'" class="badge badge-info" [nbTooltip]="coupon.productName || ''">
+                Ürüne Özel
+              </span>
+            </td>
+            <td>{{ coupon.usageCount }} kez</td>
+            <td>{{ coupon.createdAt | date:'shortDate' }}</td>
+            <td>
+              <button nbButton size="tiny" status="info" class="mr-2" (click)="openEditCouponDialog(coupon)">
+                <nb-icon icon="edit-outline"></nb-icon>
+              </button>
+              <button nbButton size="tiny" status="danger" (click)="deleteCoupon(coupon.id)">
+                <nb-icon icon="trash-outline"></nb-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="coupons.length === 0 && !loading">
+            <td colspan="7" class="text-center text-muted">Henüz hiç kupon oluşturulmamış.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </nb-card-body>
+</nb-card>

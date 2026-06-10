@@ -1,0 +1,59 @@
+
+<nb-card style="width: 500px; max-width: 95vw;">
+  <nb-card-header>{{ isNew ? 'Yeni Kupon Oluştur' : 'Kuponu Düzenle' }}</nb-card-header>
+  
+  <nb-card-body>
+    <div class="form-group row">
+      <label class="col-sm-3 col-form-label">Uygulanabilirlik</label>
+      <div class="col-sm-9">
+        <nb-select fullWidth [(ngModel)]="formData.applicability">
+          <nb-option value="all">Tüm Ürünlerde Geçerli</nb-option>
+          <nb-option value="product">Ürüne Özel</nb-option>
+        </nb-select>
+      </div>
+    </div>
+
+    <div class="form-group row" *ngIf="formData.applicability === 'product'">
+      <label class="col-sm-3 col-form-label">Ürün Seçimi</label>
+      <div class="col-sm-9">
+        <nb-select fullWidth [(ngModel)]="formData.productId" placeholder="Ürün Seçin">
+          <nb-option *ngFor="let p of products" [value]="p.id">{{ p.name }}</nb-option>
+        </nb-select>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label class="col-sm-3 col-form-label">İndirim Tipi</label>
+      <div class="col-sm-9">
+        <nb-select fullWidth [(ngModel)]="formData.discountType">
+          <nb-option value="percentage">Yüzdelik İndirim (%)</nb-option>
+          <nb-option value="flat">TL İndirimi (₺)</nb-option>
+        </nb-select>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label class="col-sm-3 col-form-label">İndirim Tutarı</label>
+      <div class="col-sm-9">
+        <input type="number" nbInput fullWidth [(ngModel)]="formData.discountValue" placeholder="0">
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label class="col-sm-3 col-form-label">Kupon Kodu</label>
+      <div class="col-sm-9">
+        <div class="d-flex">
+          <input type="text" nbInput fullWidth [(ngModel)]="formData.code" placeholder="Örn: YAZ10" style="text-transform: uppercase;">
+          <button nbButton status="info" outline class="ml-2" (click)="generateRandomCode()" style="white-space: nowrap;">
+            Rastgele Oluştur
+          </button>
+        </div>
+      </div>
+    </div>
+  </nb-card-body>
+
+  <nb-card-footer class="d-flex justify-content-end">
+    <button nbButton ghost (click)="cancel()" class="mr-2">İptal</button>
+    <button nbButton status="primary" [nbSpinner]="submitting" (click)="submit()">Kaydet</button>
+  </nb-card-footer>
+</nb-card>

@@ -31,6 +31,11 @@ export const MENU_ITEMS: NbMenuItem[] = [
     ],
   },
   {
+    title: 'Kuponlar & İndirimler',
+    icon: 'pricetags-outline',
+    link: '/pages/coupons',
+  },
+  {
     title: 'Kullanıcılar',
     icon: 'people-outline',
     link: '/pages/users',
