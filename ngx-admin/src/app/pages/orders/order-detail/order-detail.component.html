@@ -89,9 +89,9 @@
           <nb-badge [status]="getStatusBadge(order.shippingStatus)"
             [text]="getStatusText(order.shippingStatus)"></nb-badge>
         </div>
-        <div class="status-item">
-          <span class="label">Tutar</span>
-          <strong class="amount">{{ getOrderTotal(order) }} TL</strong>
+        <div class="status-item" *ngIf="order.couponCode && order.totalAmount">
+          <span class="label">Ara Toplam</span>
+          <strong class="amount" style="color: #8f9bb3; text-decoration: line-through;">{{ kurusToTl(order.totalAmount) }} TL</strong>
         </div>
         <div class="status-item" *ngIf="order.couponCode">
           <span class="label">Kupon İndirimi</span>
@@ -100,6 +100,10 @@
             <span>{{ order.couponCode }}</span>
             <span>(-{{ kurusToTl(order.discountValue) }} TL)</span>
           </div>
+        </div>
+        <div class="status-item">
+          <span class="label">{{ order.couponCode ? 'Faturalandırılacak Tutar' : 'Tutar' }}</span>
+          <strong class="amount" [style.color]="order.couponCode ? '#00d68f' : ''">{{ getOrderTotal(order) }} TL</strong>
         </div>
         <div class="status-item">
           <span class="label">Tip</span>
@@ -337,12 +341,20 @@
             <div class="box-title">Sipariş</div>
             <div class="info-row"><span>No:</span><span>{{ order.id }}</span></div>
             <div class="info-row"><span>Tarih:</span><span>{{ order.createdAt | date:'dd.MM.yy HH:mm' }}</span></div>
+            <div class="info-row" *ngIf="order.couponCode && order.totalAmount">
+              <span>Ara Toplam:</span>
+              <span style="color: #8f9bb3; text-decoration: line-through;">{{ kurusToTl(order.totalAmount) }} TL</span>
+            </div>
             <div class="info-row" *ngIf="order.couponCode">
               <span>Kupon:</span>
               <span style="color: #00d68f; font-weight: 600;">
                 <nb-icon icon="pricetags-outline"></nb-icon> {{ order.couponCode }}
                 <small>(-{{ kurusToTl(order.discountValue) }} TL)</small>
               </span>
+            </div>
+            <div class="info-row" *ngIf="order.couponCode">
+              <span>Faturalandırılacak:</span>
+              <span style="color: #00d68f; font-weight: 600;">{{ getOrderTotal(order) }} TL</span>
             </div>
             <div class="info-row" *ngIf="order.trackingNumber">
               <span>Takip:</span>
