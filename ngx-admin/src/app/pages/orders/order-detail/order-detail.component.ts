@@ -147,16 +147,20 @@ export class OrderDetailComponent implements OnInit {
   }
 
   getOrderTotal(order: any): number {
-    // Öncelik sırası: paymentAmount -> totalAmount -> (sizePrice + framePrice)
     let total = 0;
-    if (order.paymentAmount != null) {
-      total = order.paymentAmount;
-    } else if (order.totalAmount != null) {
+    if (order.totalAmount != null) {
       total = order.totalAmount;
+    } else if (order.paymentAmount != null) {
+      total = order.paymentAmount;
     } else if (order.orderType === 'product') {
       // Fiziksel ürün ise fiyatları topla
       total = (order.sizePrice || 0) + (order.framePrice || 0);
     }
+
+    if (order.discountValue) {
+      total = total - order.discountValue;
+    }
+
     // Kuruştan TL'ye çevir (100 kuruş = 1 TL)
     return total / 100;
   }
