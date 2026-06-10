@@ -4967,7 +4967,7 @@ app.get('/api/reports/trigger-daily-email', async (req, res) => {
       <tr>
         <td align="center" style="padding:40px 0 30px 0; background-color:#ffffff; border-bottom:1px solid #f3f4f6">
           <a href="https://admin.birebiro.com" style="text-decoration:none" title="Birebiro Admin">
-            <h1 style="color:#4F46E5; font-size:28px; font-weight:800; margin:0; letter-spacing:-1px;">BIREBIRO</h1>
+            <img src="https://www.birebiro.com/assets/images/birebiro-logo-black.svg" alt="Birebiro" style="height:40px; display:block; margin:0 auto;">
           </a>
           <h2 style="color:#111827; font-size:22px; font-weight:700; margin:20px 0 5px 0; letter-spacing:-0.5px">Sistem İstatistikleri</h2>
           <p style="color:#6b7280; font-size:14px; margin:0">${todayStr}</p>
