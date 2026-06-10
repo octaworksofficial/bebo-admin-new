@@ -98,8 +98,7 @@
           <div style="display: flex; align-items: center; gap: 4px; background: #e6f6e6; color: #00d68f; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
             <nb-icon icon="pricetags-outline"></nb-icon>
             <span>{{ order.couponCode }}</span>
-            <span *ngIf="order.discountType === 'percentage'">(-%{{ order.discountValue }})</span>
-            <span *ngIf="order.discountType === 'fixed_amount'">(-{{ kurusToTl(order.discountValue) }} TL)</span>
+            <span>(-{{ kurusToTl(order.discountValue) }} TL)</span>
           </div>
         </div>
         <div class="status-item">
@@ -342,8 +341,7 @@
               <span>Kupon:</span>
               <span style="color: #00d68f; font-weight: 600;">
                 <nb-icon icon="pricetags-outline"></nb-icon> {{ order.couponCode }}
-                <small *ngIf="order.discountType === 'percentage'">(-%{{ order.discountValue }})</small>
-                <small *ngIf="order.discountType === 'fixed_amount'">(-{{ kurusToTl(order.discountValue) }} TL)</small>
+                <small>(-{{ kurusToTl(order.discountValue) }} TL)</small>
               </span>
             </div>
             <div class="info-row" *ngIf="order.trackingNumber">
