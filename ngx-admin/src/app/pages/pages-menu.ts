@@ -64,6 +64,11 @@ export const MENU_ITEMS: NbMenuItem[] = [
     group: true,
   },
   {
+    title: 'PopUp Duyuru Yönetimi',
+    icon: 'message-circle-outline',
+    link: '/pages/popup-announcements',
+  },
+  {
     title: 'Site Ayarları',
     icon: 'globe-outline',
     link: '/pages/site-settings',

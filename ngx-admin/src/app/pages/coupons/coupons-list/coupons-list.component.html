@@ -1,4 +1,3 @@
-
 <nb-card [nbSpinner]="loading">
   <nb-card-header class="d-flex justify-content-between align-items-center">
     <span>Kuponlar & İndirimler</span>
@@ -33,7 +32,8 @@
             </td>
             <td>
               <span *ngIf="coupon.applicability === 'all'" class="badge badge-success">Tüm Ürünler</span>
-              <span *ngIf="coupon.applicability === 'product'" class="badge badge-info" [nbTooltip]="coupon.productName || ''">
+              <span *ngIf="coupon.applicability === 'product'" class="badge badge-info"
+                [nbTooltip]="coupon.productName || ''">
                 Ürüne Özel
               </span>
             </td>

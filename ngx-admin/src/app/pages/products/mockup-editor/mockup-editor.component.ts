@@ -1,6 +1,6 @@
 import {
   Component, Input, Output, EventEmitter, ViewChild, ElementRef,
-  OnDestroy, HostListener, ChangeDetectorRef,
+  HostListener, ChangeDetectorRef,
 } from '@angular/core';
 
 export interface MockupConfig {
@@ -20,7 +20,7 @@ export interface MockupConfig {
   templateUrl: './mockup-editor.component.html',
   styleUrls: ['./mockup-editor.component.scss'],
 })
-export class MockupEditorComponent implements OnDestroy {
+export class MockupEditorComponent {
   @ViewChild('editorCanvas', { static: false }) canvasRef: ElementRef<HTMLCanvasElement>;
 
   @Input() templateUrl: string = '';
@@ -89,8 +89,6 @@ export class MockupEditorComponent implements OnDestroy {
   private loadedTemplateUrl = '';
 
   constructor(private cdr: ChangeDetectorRef) {}
-
-  ngOnDestroy(): void {}
 
   toggleEditor(): void {
     this.showEditor = !this.showEditor;

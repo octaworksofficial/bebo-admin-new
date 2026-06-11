@@ -114,6 +114,11 @@ const routes: Routes = [{
         .then(m => m.SettingsModule),
     },
     {
+      path: 'popup-announcements',
+      loadChildren: () => import('./popup-announcements/popup-announcements.module')
+        .then(m => m.PopupAnnouncementsModule),
+    },
+    {
       path: 'tables',
       loadChildren: () => import('./tables/tables.module')
         .then(m => m.TablesModule),

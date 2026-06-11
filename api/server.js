@@ -5214,6 +5214,83 @@ app.use((req, res, next) => {
   });
 });
 
+// ==================== POPUP ANNOUNCEMENTS API ====================
+
+// Get all popups
+app.get('/api/popups', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM popup_announcements ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Fetch popups error:', error);
+    res.status(500).json({ error: 'Failed to fetch popups' });
+  }
+});
+
+// Create new popup
+app.post('/api/popups', async (req, res) => {
+  try {
+    const { title, image_url, is_active } = req.body;
+    
+    if (is_active) {
+      await pool.query('UPDATE popup_announcements SET is_active = false');
+    }
+    
+    const result = await pool.query(
+      'INSERT INTO popup_announcements (title, image_url, is_active) VALUES ($1, $2, $3) RETURNING *',
+      [title, image_url, is_active || false]
+    );
+    
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Create popup error:', error);
+    res.status(500).json({ error: 'Failed to create popup' });
+  }
+});
+
+// Update popup
+app.put('/api/popups/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, image_url, is_active } = req.body;
+    
+    if (is_active) {
+      await pool.query('UPDATE popup_announcements SET is_active = false');
+    }
+    
+    const result = await pool.query(
+      'UPDATE popup_announcements SET title = $1, image_url = $2, is_active = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4 RETURNING *',
+      [title, image_url, is_active || false, id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Popup not found' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Update popup error:', error);
+    res.status(500).json({ error: 'Failed to update popup' });
+  }
+});
+
+// Delete popup
+app.delete('/api/popups/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('DELETE FROM popup_announcements WHERE id = $1 RETURNING *', [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Popup not found' });
+    }
+    
+    res.json({ message: 'Popup deleted successfully' });
+  } catch (error) {
+    console.error('Delete popup error:', error);
+    res.status(500).json({ error: 'Failed to delete popup' });
+  }
+});
+
 // 404 handler - sadece API istekleri için
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
