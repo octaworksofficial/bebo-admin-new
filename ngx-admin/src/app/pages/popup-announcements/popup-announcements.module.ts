@@ -9,6 +9,7 @@ import {
   NbToggleModule,
   NbSpinnerModule,
 } from '@nebular/theme';
+import { ImageCropperModule } from 'ngx-image-cropper';
 
 import { ThemeModule } from '../../@theme/theme.module';
 import { PopupAnnouncementsRoutingModule } from './popup-announcements-routing.module';
@@ -27,6 +28,7 @@ import { PopupFormComponent } from './popup-form/popup-form.component';
     NbIconModule,
     NbToggleModule,
     NbSpinnerModule,
+    ImageCropperModule,
     ThemeModule,
     PopupAnnouncementsRoutingModule,
   ],

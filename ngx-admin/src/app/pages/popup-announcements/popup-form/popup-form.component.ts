@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PopupService } from '../../../@core/services/popup.service';
 import { ImageUploadService } from '../../../@core/services/image-upload.service';
+import { ImageCroppedEvent } from 'ngx-image-cropper';
 
 @Component({
   selector: 'ngx-popup-form',
@@ -15,6 +16,10 @@ export class PopupFormComponent implements OnInit {
   loading = false;
   uploading = false;
   previewUrl: string | ArrayBuffer | null = null;
+  
+  imageChangedEvent: any = '';
+  croppedImage: any = '';
+  showCropper = false;
 
   constructor(
     private fb: FormBuilder,
@@ -62,14 +67,49 @@ export class PopupFormComponent implements OnInit {
   }
 
   onFileSelected(event: any) {
-    const file: File = event.target.files[0];
-    if (file) {
+    this.imageChangedEvent = event;
+    this.showCropper = true;
+  }
+
+  imageCropped(event: ImageCroppedEvent) {
+    this.croppedImage = event.objectUrl || event.base64;
+  }
+
+  imageLoaded() {
+    // show cropper
+  }
+
+  cropperReady() {
+    // cropper ready
+  }
+
+  loadImageFailed() {
+    alert('Görsel yüklenemedi.');
+  }
+
+  cancelCrop() {
+    this.showCropper = false;
+    this.imageChangedEvent = '';
+    this.croppedImage = '';
+  }
+
+  async uploadCroppedImage() {
+    if (!this.croppedImage) return;
+    
+    this.uploading = true;
+    this.showCropper = false;
+
+    try {
+      // Convert objectUrl or base64 to Blob, then to File
+      const response = await fetch(this.croppedImage);
+      const blob = await response.blob();
+      const file = new File([blob], 'popup-image.png', { type: 'image/png' });
+
       // Local preview
       const reader = new FileReader();
       reader.onload = e => this.previewUrl = reader.result;
       reader.readAsDataURL(file);
 
-      this.uploading = true;
       this.imageUploadService.uploadImage(file).subscribe({
         next: (res: any) => {
           this.form.patchValue({ image_url: res.image_url });
@@ -81,6 +121,10 @@ export class PopupFormComponent implements OnInit {
           alert('Görsel yüklenirken hata oluştu.');
         }
       });
+    } catch (e) {
+      console.error('Blob conversion error', e);
+      this.uploading = false;
+      alert('Görsel işlenirken hata oluştu.');
     }
   }
 
